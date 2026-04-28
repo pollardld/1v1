@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>1v1 Finisher</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky-top: #7CC4F2;
+    --sky-mid: #B8E0F5;
+    --sky-low: #E8F4FA;
+    --sun: #FFE066;
+    --sun-glow: #FFF4B0;
+    --grass-light: #8BD16E;
+    --grass-mid: #5BAF42;
+    --grass-dark: #3E8A2C;
+    --chalk: #FAFAF5;
+    --shadow-grass: rgba(20, 60, 20, 0.18);
+    --ink: #1a2e1a;
+    --ink-soft: rgba(26, 46, 26, 0.65);
+    --ink-fade: rgba(26, 46, 26, 0.35);
+    --orange: #FF7A2E;
+    --red: #E63946;
+    --amber: #F4A800;
+    --paper: #FFFCF5;
+    --border: rgba(26, 46, 26, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--paper); color: var(--ink);
+    font-family: 'Inter Tight', sans-serif; overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .screen.hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
+
+  /* ============ HOME ============ */
+  #home {
+    background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-mid) 35%, var(--sky-low) 55%, var(--grass-light) 56%, var(--grass-mid) 100%);
+    position: relative; overflow: hidden;
+  }
+  .sun {
+    position: absolute; top: 8%; right: 12%;
+    width: 90px; height: 90px;
+    background: radial-gradient(circle, var(--sun) 30%, var(--sun-glow) 60%, transparent 75%);
+    border-radius: 50%;
+    box-shadow: 0 0 80px var(--sun-glow), 0 0 40px var(--sun);
+    animation: sun-pulse 4s ease-in-out infinite;
+  }
+  @keyframes sun-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.95; }
+  }
+  .sun::before {
+    content: ''; position: absolute; inset: 25%;
+    background: var(--sun); border-radius: 50%;
+    box-shadow: 0 0 30px var(--sun-glow);
+  }
+  .lens-flare {
+    position: absolute; top: 12%; right: 14%;
+    width: 200px; height: 4px;
+    background: linear-gradient(to right, transparent, rgba(255,244,176,0.6), transparent);
+    transform: rotate(-25deg); pointer-events: none;
+  }
+  .cloud {
+    position: absolute; background: white; border-radius: 100px;
+    opacity: 0.85;
+    box-shadow: 0 4px 12px rgba(124,196,242,0.25);
+  }
+  .cloud-1 { top: 14%; left: 8%; width: 80px; height: 22px; animation: drift 60s linear infinite; }
+  .cloud-2 { top: 22%; left: 50%; width: 110px; height: 28px; animation: drift 80s linear infinite -20s; }
+  .cloud-3 { top: 6%; left: 30%; width: 60px; height: 18px; animation: drift 100s linear infinite -40s; }
+  .cloud::before, .cloud::after {
+    content: ''; position: absolute; background: white; border-radius: 50%;
+  }
+  .cloud::before { width: 50%; height: 180%; top: -60%; left: 15%; }
+  .cloud::after { width: 40%; height: 160%; top: -45%; right: 18%; }
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to { transform: translateX(120vw); }
+  }
+  .pitch-perspective {
+    position: absolute; bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 200%; height: 50%;
+    background: linear-gradient(to bottom, rgba(91,175,66,0.0) 0%, rgba(91,175,66,0.4) 30%, rgba(62,138,44,0.6) 100%);
+  }
+  .pitch-perspective::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0px, transparent 38px, rgba(255,255,255,0.18) 38px, rgba(255,255,255,0.18) 40px),
+      repeating-linear-gradient(90deg, transparent 0px, transparent 78px, rgba(255,255,255,0.12) 78px, rgba(255,255,255,0.12) 80px);
+    transform: perspective(380px) rotateX(58deg);
+    transform-origin: bottom center;
+  }
+  .grass-stripes {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+    background: repeating-linear-gradient(to bottom,
+      rgba(62,138,44,0.0) 0%, rgba(62,138,44,0.0) 6%,
+      rgba(46,108,32,0.18) 6%, rgba(46,108,32,0.18) 12%);
+    pointer-events: none;
+  }
+  .home-content {
+    position: relative; z-index: 2;
+    flex: 1; padding: 32px 24px 80px;
+    display: flex; flex-direction: column; justify-content: center;
+    overflow-y: auto;
+  }
+  .home-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    color: var(--ink); background: var(--sun);
+    padding: 6px 12px; border-radius: 100px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 16px rgba(255,224,102,0.5), 0 2px 4px rgba(26,46,26,0.1);
+    align-self: flex-start;
+    opacity: 0; animation: fade-up 0.6s 0.1s forwards;
+  }
+  .home-eyebrow::before { content: '☀'; font-size: 13px; }
+  .home-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(64px, 16vw, 96px);
+    font-weight: 800; line-height: 0.85; letter-spacing: -3px;
+    margin-top: 16px;
+    opacity: 0; animation: fade-up 0.6s 0.2s forwards;
+  }
+  .home-title .one {
+    background: linear-gradient(135deg, var(--ink) 0%, var(--grass-dark) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .home-title .v {
+    color: var(--orange); font-style: italic;
+    transform: rotate(-5deg) translateY(-4px);
+    display: inline-block;
+  }
+  .home-title .finisher {
+    display: block; margin-top: 4px;
+    color: var(--ink); font-size: 0.88em; line-height: 0.9;
+  }
+  .home-sub {
+    font-size: 14px; color: var(--ink-soft); font-weight: 500;
+    margin-top: 14px; line-height: 1.5; max-width: 320px;
+    opacity: 0; animation: fade-up 0.6s 0.3s forwards;
+  }
+  .mode-cards {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-top: 24px;
+    opacity: 0; animation: fade-up 0.6s 0.45s forwards;
+  }
+  .mode-card {
+    background: var(--paper);
+    border: 2px solid var(--ink); border-radius: 18px;
+    padding: 16px; cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position: relative; overflow: hidden;
+    box-shadow: 4px 4px 0 var(--ink);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .mode-card:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .mode-card.ar { background: linear-gradient(135deg, #FFF7D6 0%, #FFE066 100%); }
+  .mode-card.sim { background: linear-gradient(135deg, #D6F4C7 0%, #8BD16E 100%); }
+  .mode-icon-box {
+    width: 48px; height: 48px; flex-shrink: 0;
+    border: 2px solid var(--ink); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; background: var(--paper);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .mode-info { flex: 1; }
+  .mode-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+  .mode-desc {
+    font-size: 11px; color: var(--ink-soft); margin-top: 2px;
+    font-weight: 500;
+  }
+  .mode-arrow { font-size: 20px; font-weight: 800; color: var(--ink); }
+  .home-footer-row {
+    display: flex; gap: 8px; margin-top: 12px;
+    opacity: 0; animation: fade-up 0.6s 0.55s forwards;
+  }
+  .home-footer-btn {
+    flex: 1; padding: 12px 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--paper); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 12px;
+    cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+  }
+  .home-footer-btn:active {
+    transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  /* ============ AR ============ */
+  #ar-screen { background: #000; }
+  #camera-feed {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .ar-ui { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .ar-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 14px 8px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+  }
+  .ar-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--sun); color: var(--ink);
+    padding: 6px 12px; border-radius: 100px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .ar-pill::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--red); animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.7); opacity: 0.6; }
+  }
+  .ar-stats {
+    display: flex; gap: 6px; background: var(--paper);
+    padding: 6px 10px; border-radius: 12px;
+    border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .ar-stat {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 6px; min-width: 34px;
+  }
+  .ar-stat-val {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 18px; font-weight: 800; line-height: 1; color: var(--ink);
+  }
+  .ar-stat-val.green { color: var(--grass-dark); }
+  .ar-stat-val.amber { color: var(--orange); }
+  .ar-stat-lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: 1px;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .goal-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    width: 96vw; max-width: 460px;
+    pointer-events: none;
+  }
+  .goal-frame {
+    width: 100%; aspect-ratio: 3/1.5;
+    border: 4px solid var(--chalk); border-bottom: none;
+    position: relative;
+    box-shadow: 0 0 24px rgba(255,255,255,0.4), inset 0 0 30px rgba(0,0,0,0.3);
+    pointer-events: none;
+  }
+  .goal-zones {
+    position: absolute; inset: 0;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    pointer-events: all;
+  }
+  .goal-zone {
+    border: 1px dashed rgba(255,255,255,0.35);
+    cursor: pointer; transition: background 0.15s;
+    position: relative;
+  }
+  .goal-zone::after {
+    content: attr(data-label);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .goal-zone.targeted {
+    background: rgba(255,224,102,0.45);
+    border: 2px solid var(--sun);
+    box-shadow: inset 0 0 20px rgba(255,224,102,0.5);
+  }
+  .goal-zone.targeted::after {
+    opacity: 1;
+    color: var(--sun);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+  .gk-silhouette {
+    position: absolute; bottom: 0;
+    width: 22%; aspect-ratio: 0.45/1;
+    background: rgba(255,224,102,0.5);
+    border-radius: 40% 40% 0 0;
+    border: 2px solid var(--sun);
+    transition: left 0.3s ease;
+    cursor: grab; touch-action: none; pointer-events: all;
+  }
+  .gk-silhouette::before {
+    content: '';
+    position: absolute; top: -20%; left: 50%;
+    transform: translateX(-50%);
+    width: 48%; aspect-ratio: 1;
+    background: rgba(255,224,102,0.5);
+    border-radius: 50%;
+    border: 2px solid var(--sun);
+  }
+  .gk-silhouette::after {
+    content: '';
+    position: absolute; top: 20%; left: -32%;
+    width: 164%; height: 16%;
+    background: rgba(255,224,102,0.4);
+    border-radius: 4px;
+    border: 2px solid var(--sun);
+  }
+  .ar-bottom {
+    margin-top: auto; padding: 14px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  }
+  .gk-presets {
+    display: flex; gap: 4px; margin-bottom: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .preset-btn {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 100px;
+    background: var(--paper); border: 2px solid var(--ink); color: var(--ink);
+    cursor: pointer; box-shadow: 2px 2px 0 var(--ink);
+  }
+  .preset-btn:active {
+    transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink);
+  }
+  .ar-instructions {
+    text-align: center; color: var(--paper); font-size: 11px;
+    font-weight: 500; margin-bottom: 10px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+  .ar-log-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .log-btn {
+    flex: 1; padding: 14px 6px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    border: 2px solid var(--ink); border-radius: 12px;
+    cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+  }
+  .log-btn:active {
+    transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink);
+  }
+  .log-btn.goal { background: var(--grass-light); color: var(--ink); }
+  .log-btn.save { background: var(--sun); color: var(--ink); }
+  .log-btn.miss { background: var(--paper); color: var(--ink); }
+  .log-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .ar-controls-row { display: flex; gap: 6px; }
+  .ctrl-btn {
+    flex: 1; padding: 9px 6px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--paper); border: 2px solid var(--ink);
+    color: var(--ink); border-radius: 10px; cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .ctrl-btn:active {
+    transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink);
+  }
+  .cam-permission {
+    position: absolute; inset: 0; z-index: 30;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 32px; text-align: center;
+    background: linear-gradient(to bottom, var(--sky-top), var(--sky-mid) 60%, var(--grass-light));
+  }
+  .cam-perm-icon {
+    width: 80px; height: 80px;
+    background: var(--sun); border: 3px solid var(--ink); border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px; box-shadow: 4px 4px 0 var(--ink);
+  }
+  .cam-perm-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 28px; font-weight: 800; letter-spacing: -1px; color: var(--ink);
+  }
+  .cam-perm-text {
+    font-size: 14px; color: var(--ink-soft); line-height: 1.5;
+    max-width: 300px; font-weight: 500;
+  }
+  .cam-error {
+    display: none;
+    max-width: 340px;
+    padding: 10px 12px;
+    background: rgba(230,57,70,0.14);
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .cam-perm-btn {
+    padding: 14px 32px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--orange); color: white;
+    border: 3px solid var(--ink); border-radius: 14px;
+    cursor: pointer; box-shadow: 4px 4px 0 var(--ink); margin-top: 8px;
+  }
+  .cam-perm-btn:active {
+    transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  /* ============ SIM v2 ============ */
+  #sim-screen {
+    background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-mid) 25%, var(--sky-low) 40%, var(--grass-light) 41%, var(--grass-mid) 100%);
+    overflow: hidden;
+  }
+  .sim-sun {
+    position: absolute; top: 4%; left: 8%;
+    width: 50px; height: 50px;
+    background: radial-gradient(circle, var(--sun) 30%, var(--sun-glow) 60%, transparent 75%);
+    border-radius: 50%;
+    box-shadow: 0 0 40px var(--sun-glow);
+  }
+  #sim-screen::before {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0; height: 60%;
+    background: repeating-linear-gradient(to bottom,
+      transparent 0%, transparent 8%,
+      rgba(46,108,32,0.18) 8%, rgba(46,108,32,0.18) 16%);
+    pointer-events: none;
+  }
+  .sim-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px; flex-shrink: 0; position: relative; z-index: 5;
+    gap: 8px;
+  }
+  .sim-title-block {
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 10px;
+    padding: 5px 10px; box-shadow: 2px 2px 0 var(--ink);
+    flex-shrink: 0;
+  }
+  .sim-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--ink); line-height: 1.1;
+  }
+  .sim-subtitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 9px; font-weight: 500; color: var(--ink-soft);
+  }
+  .sim-stats-pill {
+    display: flex; gap: 2px; background: var(--paper);
+    padding: 4px 6px; border-radius: 10px;
+    border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .sim-stat { padding: 0 4px; text-align: center; min-width: 26px; }
+  .sim-stat-val {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px; font-weight: 800; line-height: 1; color: var(--ink);
+  }
+  .sim-stat-val.green { color: var(--grass-dark); }
+  .sim-stat-val.amber { color: var(--orange); }
+  .sim-stat-lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 7px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .difficulty-row {
+    display: flex; gap: 4px; padding: 0 12px 8px;
+    flex-shrink: 0; justify-content: center; align-items: center;
+    position: relative; z-index: 5;
+  }
+  .diff-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--ink); text-transform: uppercase; margin-right: 2px;
+  }
+  .diff-btn {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 100px;
+    background: var(--paper); border: 2px solid var(--ink);
+    color: var(--ink); cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .diff-btn:active {
+    transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink);
+  }
+  .diff-btn.active { background: var(--orange); color: white; }
+
+  /* Tactical pitch view */
+  .pitch-view-container {
+    position: relative; z-index: 4;
+    width: 100%;
+    padding: 6px 12px 0;
+    flex-shrink: 0;
+  }
+  .pitch-tactical {
+    width: 100%;
+    aspect-ratio: 2/1.4;
+    max-height: 38vh;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(80,150,60,0.3) 0%, rgba(46,108,32,0.5) 100%);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  /* mowed lines */
+  .pitch-tactical::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(to bottom,
+      transparent 0%, transparent 10%,
+      rgba(46,108,32,0.3) 10%, rgba(46,108,32,0.3) 20%);
+  }
+  /* penalty box */
+  .pen-box {
+    position: absolute;
+    top: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 60%; height: 40%;
+    border: 2px solid var(--chalk);
+    border-top: none;
+    pointer-events: none;
+  }
+  .pen-arc {
+    position: absolute;
+    top: 40%; left: 50%; transform: translateX(-50%);
+    width: 25%; aspect-ratio: 2/1;
+    border: 2px solid var(--chalk);
+    border-top: none;
+    border-radius: 0 0 100% 100%;
+    pointer-events: none;
+  }
+  .six-yard {
+    position: absolute;
+    top: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 30%; height: 18%;
+    border: 2px solid var(--chalk);
+    border-top: none;
+    pointer-events: none;
+  }
+  .pen-spot {
+    position: absolute;
+    top: 28%; left: 50%; transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    background: var(--chalk); border-radius: 50%;
+  }
+  /* goal */
+  .goal-line {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 14%; height: 4px;
+    background: var(--chalk);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* GK on pitch */
+  .gk-pitch {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: top 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), left 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .gk-pitch::after {
+    content: 'GK';
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 800; color: var(--orange);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  /* shooter */
+  .shooter-pitch {
+    position: absolute;
+    width: 16px; height: 16px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: top 0.5s ease, left 0.5s ease;
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
+  }
+  .shooter-pitch::after {
+    content: 'YOU';
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 800; color: var(--paper);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    white-space: nowrap;
+  }
+  .shooter-pitch.armed { background: var(--orange); }
+  /* defender */
+  .defender-pitch {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: #444;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: top 0.6s ease, left 0.6s ease;
+    z-index: 4;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .defender-pitch::after {
+    content: 'D';
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 800; color: #ddd;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  }
+
+  /* tap-to-place hint */
+  .tap-hint {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--ink);
+    box-shadow: 1px 1px 0 var(--ink);
+    z-index: 6;
+  }
+
+  /* angle line visualization */
+  .angle-svg {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .angle-line {
+    stroke: var(--orange);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+    fill: rgba(255,122,46,0.15);
+    opacity: 0.7;
+  }
+
+  /* xG / metrics strip */
+  .metrics-strip {
+    display: flex; gap: 4px; padding: 6px 12px 0;
+    flex-shrink: 0; position: relative; z-index: 5;
+    margin-top: 4px;
+  }
+  .metric-box {
+    flex: 1; background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 10px; padding: 5px 6px;
+    box-shadow: 2px 2px 0 var(--ink);
+    text-align: center;
+  }
+  .metric-val {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 16px; font-weight: 800; line-height: 1;
+    color: var(--ink);
+  }
+  .metric-val.xg-low { color: var(--red); }
+  .metric-val.xg-mid { color: var(--orange); }
+  .metric-val.xg-high { color: var(--grass-dark); }
+  .metric-lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--ink-soft); text-transform: uppercase; margin-top: 2px;
+  }
+
+  /* Goal & zones */
+  .goal-3d-container {
+    position: relative; z-index: 3;
+    width: min(96vw, 460px);
+    margin: 6px auto 0;
+  }
+  .goal-3d {
+    width: 100%; aspect-ratio: 3/1.5;
+    position: relative;
+    border: 4px solid var(--chalk); border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(40,80,30,0.4) 0%, rgba(20,50,15,0.7) 100%);
+    box-shadow: 0 0 30px rgba(255,255,255,0.3), inset 0 0 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+  .goal-3d::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 14px 10px;
+  }
+  .goal-3d::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: -2px; right: -2px; height: 4px;
+    background: var(--chalk);
+  }
+  .goal-shadow {
+    width: min(96vw, 460px); height: 10px;
+    background: radial-gradient(ellipse at center, var(--shadow-grass) 30%, transparent 70%);
+    margin: 4px auto 0;
+    position: relative; z-index: 2;
+  }
+  .shot-zones {
+    position: absolute; inset: 0;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr); z-index: 4;
+  }
+  .shot-zone {
+    border: 1px dashed rgba(255,255,255,0.1);
+    cursor: pointer; position: relative;
+    transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .shot-zone::after {
+    content: attr(data-label);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.3); text-transform: uppercase;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .shot-zone:hover::after { opacity: 1; }
+  .shot-zone.selected {
+    background: rgba(255,224,102,0.35);
+    border: 2px solid var(--sun);
+    box-shadow: inset 0 0 20px rgba(255,224,102,0.4);
+  }
+  .shot-zone.selected::after { opacity: 1; color: var(--sun); }
+  .shot-zone.gk-save {
+    background: rgba(244,168,0,0.45) !important;
+    border-color: var(--amber) !important;
+  }
+  .shot-zone.goal-scored {
+    background: rgba(139,209,110,0.5) !important;
+    border-color: var(--grass-light) !important;
+  }
+  .shot-zone.missed {
+    background: rgba(230,57,70,0.35) !important;
+    border-color: var(--red) !important;
+  }
+
+  /* GK in goal */
+  .gk-sim {
+    position: absolute; bottom: 0; z-index: 5;
+    width: 18%; aspect-ratio: 0.45/1;
+    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
+    border-radius: 40% 40% 0 0;
+    border: 2px solid var(--ink);
+    transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                bottom 0.4s ease, opacity 0.3s;
+    pointer-events: none;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+  }
+  .gk-sim::before {
+    content: '';
+    position: absolute; top: -22%; left: 50%;
+    transform: translateX(-50%);
+    width: 50%; aspect-ratio: 1;
+    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+  }
+  .gk-sim::after {
+    content: '';
+    position: absolute; top: 18%; left: -36%;
+    width: 172%; height: 22%;
+    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
+    border-radius: 6px;
+    border: 2px solid var(--ink);
+  }
+  .gk-sim.diving-left {
+    transform: rotate(-50deg) translateX(-40%) translateY(-10%);
+  }
+  .gk-sim.diving-right {
+    transform: rotate(50deg) translateX(40%) translateY(-10%);
+  }
+  .gk-sim.charging {
+    transform: scale(1.15) translateY(8%);
+    bottom: 8%;
+  }
+
+  /* GK behavior badge */
+  .gk-behavior {
+    position: absolute; top: 6px; right: 6px; z-index: 6;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 6px; border-radius: 100px;
+    background: var(--paper); border: 2px solid var(--ink); color: var(--ink);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  /* Decision timer bar */
+  .decision-bar-wrap {
+    position: relative; z-index: 5;
+    margin: 6px 12px 0;
+    padding: 0;
+  }
+  .decision-bar-bg {
+    width: 100%; height: 6px;
+    background: rgba(26,46,26,0.15);
+    border: 2px solid var(--ink);
+    border-radius: 100px;
+    overflow: hidden;
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .decision-bar-fill {
+    height: 100%; width: 100%;
+    background: linear-gradient(to right, var(--grass-light), var(--sun), var(--orange), var(--red));
+    transition: width linear;
+  }
+  .decision-bar-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--ink); text-align: center; margin-top: 4px;
+  }
+
+  /* Bottom controls */
+  .sim-controls {
+    position: absolute; bottom: 70px; left: 0; right: 0;
+    padding: 0 12px;
+    z-index: 6;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .scenario-btn-row {
+    display: flex; gap: 6px;
+  }
+  .scenario-btn {
+    flex: 1; padding: 8px 6px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    background: var(--paper); border: 2px solid var(--ink);
+    color: var(--ink); border-radius: 10px; cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .scenario-btn.active { background: var(--sun); }
+  .scenario-btn:active {
+    transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .pause-btn {
+    width: 100%; padding: 14px 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--paper); color: var(--ink);
+    border: 3px solid var(--ink); border-radius: 14px;
+    cursor: pointer; box-shadow: 4px 4px 0 var(--ink);
+  }
+  .pause-btn.active { background: var(--sun); }
+  .pause-btn:active:not(:disabled) {
+    transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .pause-btn:disabled {
+    opacity: 0.45; cursor: not-allowed;
+    background: var(--ink-fade);
+  }
+
+  /* Outcome flash */
+  .outcome-flash {
+    position: absolute; inset: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    background: rgba(232,244,250,0.7);
+    backdrop-filter: blur(2px);
+    padding: 24px;
+  }
+  .outcome-flash.show { opacity: 1; pointer-events: all; }
+  .outcome-card {
+    background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
+    padding: 22px 26px;
+    box-shadow: 6px 6px 0 var(--ink);
+    text-align: center; max-width: 320px; width: 100%;
+    animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .outcome-emoji { font-size: 44px; margin-bottom: 0; }
+  .outcome-word {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -1px;
+    text-transform: uppercase;
+  }
+  .outcome-word.goal { color: var(--grass-dark); }
+  .outcome-word.save { color: var(--orange); }
+  .outcome-word.miss { color: var(--red); }
+  .outcome-sub {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    margin-top: 4px; line-height: 1.4;
+  }
+  .outcome-stats {
+    display: flex; gap: 6px; margin-top: 14px;
+    justify-content: center;
+  }
+  .outcome-mini-stat {
+    background: var(--sky-low);
+    border: 1.5px solid var(--ink);
+    border-radius: 8px;
+    padding: 5px 8px;
+    flex: 1;
+  }
+  .outcome-mini-val {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px; font-weight: 800; color: var(--ink);
+    line-height: 1;
+  }
+  .outcome-mini-lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--ink-soft); text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .decision-quality {
+    margin-top: 14px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-align: left;
+    border: 2px solid var(--ink);
+  }
+  .decision-quality.excellent { background: var(--grass-light); }
+  .decision-quality.good { background: var(--sun); }
+  .decision-quality.poor { background: rgba(255,122,46,0.3); }
+  .outcome-next-btn {
+    margin-top: 14px; padding: 10px 24px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--ink); color: var(--paper);
+    border: 3px solid var(--ink); border-radius: 12px;
+    cursor: pointer; width: 100%;
+  }
+
+  /* ============ STATS ============ */
+  #stats-screen {
+    background: linear-gradient(to bottom, var(--sky-low) 0%, var(--paper) 50%);
+    overflow-y: auto;
+  }
+  .stats-header {
+    padding: 20px 16px 14px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    position: sticky; top: 0; background: var(--sky-low); z-index: 10;
+    border-bottom: 2px solid var(--ink);
+  }
+  .stats-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 28px; font-weight: 800; letter-spacing: -1px;
+    color: var(--ink); line-height: 1;
+  }
+  .stats-subtitle {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 12px; color: var(--ink-soft); font-weight: 500; margin-top: 4px;
+  }
+  .stats-content { padding: 16px 16px 80px; }
+  .stat-cards-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 14px; padding: 14px 8px; text-align: center;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .stat-card.bg-green { background: linear-gradient(135deg, #D6F4C7, #8BD16E); }
+  .stat-card.bg-amber { background: linear-gradient(135deg, #FFF7D6, #FFE066); }
+  .stat-card.bg-red { background: linear-gradient(135deg, #FFD6D9, #FF9DA3); }
+  .stat-card-val {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 32px; font-weight: 800; line-height: 1; color: var(--ink);
+  }
+  .stat-card-lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--ink); text-transform: uppercase; margin-top: 4px;
+  }
+  .big-stat-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin-bottom: 16px;
+  }
+  .big-stat {
+    background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 14px; padding: 12px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .big-stat-val {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 28px; font-weight: 800; line-height: 1; color: var(--ink);
+  }
+  .big-stat-lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--ink-soft); text-transform: uppercase; margin-top: 4px;
+  }
+  .section-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--ink); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: ''; width: 16px; height: 4px;
+    background: var(--orange); border-radius: 2px;
+  }
+  .heatmap-container { margin-bottom: 24px; }
+  .heatmap-goal {
+    width: 100%; aspect-ratio: 3/1.5;
+    background: linear-gradient(180deg, rgba(40,80,30,0.4), rgba(20,50,15,0.7));
+    border: 4px solid var(--chalk); border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    overflow: hidden; position: relative;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  }
+  .heatmap-goal::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 14px 10px;
+    pointer-events: none;
+  }
+  .heatmap-cell {
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px;
+    position: relative; overflow: hidden;
+  }
+  .heatmap-cell-bg {
+    position: absolute; inset: 0;
+    transition: opacity 0.5s ease;
+  }
+  .heatmap-pct {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px; font-weight: 800; position: relative; z-index: 1;
+    color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
+  .heatmap-count {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 9px; color: rgba(255,255,255,0.7);
+    position: relative; z-index: 1; font-weight: 500;
+  }
+  .heatmap-baseline {
+    width: 100%; height: 4px;
+    background: var(--chalk);
+    margin-bottom: 4px;
+    box-shadow: 0 4px 0 var(--shadow-grass);
+  }
+  .heatmap-legend {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; font-size: 10px; color: var(--ink-soft);
+    font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .legend-bar {
+    flex: 1; height: 8px; border-radius: 4px;
+    background: linear-gradient(to right, var(--red), var(--amber), var(--grass-light));
+    border: 1px solid var(--ink);
+  }
+  .shot-log { margin-bottom: 24px; }
+  .log-empty {
+    text-align: center; padding: 32px; color: var(--ink-soft);
+    font-size: 14px; font-weight: 500;
+    background: var(--paper); border: 2px dashed var(--border);
+    border-radius: 14px;
+  }
+  .log-entry {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 12px;
+    background: var(--paper); border: 2px solid var(--ink);
+    margin-bottom: 6px; box-shadow: 2px 2px 0 var(--ink);
+  }
+  .log-outcome-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--ink); flex-shrink: 0;
+  }
+  .log-outcome-dot.goal { background: var(--grass-light); }
+  .log-outcome-dot.save { background: var(--sun); }
+  .log-outcome-dot.miss { background: var(--red); }
+  .log-entry-info { flex: 1; }
+  .log-entry-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px; font-weight: 700; color: var(--ink);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .log-entry-meta {
+    font-size: 11px; color: var(--ink-soft); margin-top: 1px;
+  }
+  .log-entry-mode {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 100px; text-transform: uppercase;
+    border: 2px solid var(--ink);
+  }
+  .log-entry-mode.ar { background: var(--sun); color: var(--ink); }
+  .log-entry-mode.sim { background: var(--grass-light); color: var(--ink); }
+  .insight-card {
+    background: linear-gradient(135deg, var(--sun-glow), var(--sun));
+    border: 2px solid var(--ink); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 12px;
+    box-shadow: 3px 3px 0 var(--ink);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .insight-icon { font-size: 28px; flex-shrink: 0; }
+  .insight-text {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 13px; color: var(--ink); font-weight: 500; line-height: 1.45;
+  }
+  .insight-text b {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800; font-size: 14px;
+  }
+
+  /* ============ REFERENCES ============ */
+  #refs-screen {
+    background: linear-gradient(to bottom, var(--sky-low), var(--paper));
+    overflow-y: auto;
+  }
+  .refs-header {
+    padding: 20px 16px 14px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--sky-low);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .refs-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 26px; font-weight: 800; letter-spacing: -1px; color: var(--ink); line-height: 1;
+  }
+  .refs-sub {
+    font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-weight: 500;
+  }
+  .refs-content { padding: 16px 16px 80px; }
+  .ref-section {
+    background: var(--paper); border: 2px solid var(--ink);
+    border-radius: 14px; padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .ref-section-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px; font-weight: 800; letter-spacing: 0.5px;
+    color: var(--ink); margin-bottom: 6px;
+  }
+  .ref-section-feat {
+    font-size: 12px; color: var(--ink-soft); font-weight: 500;
+    margin-bottom: 8px; line-height: 1.45;
+  }
+  .ref-list {
+    list-style: none; padding: 0; margin: 0;
+  }
+  .ref-list li {
+    font-size: 11px; color: var(--ink); margin-bottom: 6px;
+    line-height: 1.4; padding-left: 14px; position: relative;
+  }
+  .ref-list li::before {
+    content: '→'; position: absolute; left: 0; color: var(--orange);
+    font-weight: 800;
+  }
+  .ref-list a {
+    color: var(--grass-dark); text-decoration: underline;
+    word-break: break-word;
+  }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex;
+    background: var(--paper);
+    border-top: 2px solid var(--ink);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    box-shadow: 0 -4px 0 rgba(26,46,26,0.06);
+  }
+  .nav-btn {
+    flex: 1; padding: 10px 4px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    cursor: pointer; transition: background 0.15s;
+    border: none; background: none;
+    border-right: 2px solid var(--border);
+  }
+  .nav-btn:last-child { border-right: none; }
+  .nav-icon { font-size: 18px; line-height: 1; }
+  .nav-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .nav-btn.active { background: var(--sun); }
+  .nav-btn.active .nav-label { color: var(--ink); }
+  .has-nav { padding-bottom: 60px; }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen" id="home">
+  <div class="sun"></div>
+  <div class="lens-flare"></div>
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+  <div class="grass-stripes"></div>
+  <div class="pitch-perspective"></div>
+
+  <div class="home-content">
+    <div class="home-eyebrow">Solo Training System</div>
+    <div class="home-title">
+      <span class="one">1</span><span class="v">V</span><span class="one">1</span>
+      <span class="finisher">FINISHER</span>
+    </div>
+    <div class="home-sub">Sharpen your one-on-ones. Track angle, distance, decision quality. Built on elite cognitive training research.</div>
+
+    <div class="mode-cards">
+      <div class="mode-card ar" onclick="startAR()">
+        <div class="mode-icon-box">📷</div>
+        <div class="mode-info">
+          <div class="mode-title">AR Mode</div>
+          <div class="mode-desc">Camera overlay on your real goal</div>
+        </div>
+        <div class="mode-arrow">→</div>
+      </div>
+      <div class="mode-card sim" onclick="startSim()">
+        <div class="mode-icon-box">⚽</div>
+        <div class="mode-info">
+          <div class="mode-title">Simulator</div>
+          <div class="mode-desc">Tactical 1v1 with xG &amp; decision timer</div>
+        </div>
+        <div class="mode-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="home-footer-row">
+      <button class="home-footer-btn" onclick="showStats()">📊 Stats</button>
+      <button class="home-footer-btn" onclick="showRefs()">📚 Research</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" onclick="startAR()"><span class="nav-icon">📷</span><span class="nav-label">AR</span></button>
+    <button class="nav-btn" onclick="startSim()"><span class="nav-icon">⚽</span><span class="nav-label">Sim</span></button>
+    <button class="nav-btn" onclick="showStats()"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+    <button class="nav-btn" onclick="showRefs()"><span class="nav-icon">📚</span><span class="nav-label">Refs</span></button>
+  </div>
+</div>
+
+<!-- AR (unchanged from v1) -->
+<div class="screen hidden" id="ar-screen">
+  <video id="camera-feed" autoplay playsinline muted></video>
+  <div class="cam-permission" id="cam-permission">
+    <div class="cam-perm-icon">📷</div>
+    <div class="cam-perm-title">Camera Access</div>
+    <div class="cam-perm-text">Set your phone on a tripod aimed at your goal. The keeper silhouette will overlay on the frame.</div>
+    <div class="cam-error" id="cam-error"></div>
+    <button class="cam-perm-btn" onclick="requestCamera()">Enable Camera</button>
+    <button class="ctrl-btn" onclick="showScreen('home')" style="margin-top:6px;max-width:140px">← Back</button>
+  </div>
+  <div class="ar-ui" id="ar-ui" style="display:none">
+    <div class="ar-topbar">
+      <div class="ar-pill">Live AR</div>
+      <div class="ar-stats">
+        <div class="ar-stat"><div class="ar-stat-val green" id="ar-goals">0</div><div class="ar-stat-lbl">Gls</div></div>
+        <div class="ar-stat"><div class="ar-stat-val" id="ar-attempts">0</div><div class="ar-stat-lbl">Att</div></div>
+        <div class="ar-stat"><div class="ar-stat-val amber" id="ar-pct">—</div><div class="ar-stat-lbl">%</div></div>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center">
+      <div class="goal-overlay" id="goal-overlay">
+        <div class="goal-frame" id="ar-goal-frame">
+          <div class="goal-zones" id="ar-goal-zones">
+            <div class="goal-zone" data-zone="R1C1" data-label="High L" onclick="selectARZone('R1C1')"></div>
+            <div class="goal-zone" data-zone="R1C2" data-label="High ML" onclick="selectARZone('R1C2')"></div>
+            <div class="goal-zone" data-zone="R1C3" data-label="High MR" onclick="selectARZone('R1C3')"></div>
+            <div class="goal-zone" data-zone="R1C4" data-label="High R" onclick="selectARZone('R1C4')"></div>
+            <div class="goal-zone" data-zone="R2C1" data-label="Mid L" onclick="selectARZone('R2C1')"></div>
+            <div class="goal-zone" data-zone="R2C2" data-label="Mid ML" onclick="selectARZone('R2C2')"></div>
+            <div class="goal-zone" data-zone="R2C3" data-label="Mid MR" onclick="selectARZone('R2C3')"></div>
+            <div class="goal-zone" data-zone="R2C4" data-label="Mid R" onclick="selectARZone('R2C4')"></div>
+            <div class="goal-zone" data-zone="R3C1" data-label="Low L" onclick="selectARZone('R3C1')"></div>
+            <div class="goal-zone" data-zone="R3C2" data-label="Low ML" onclick="selectARZone('R3C2')"></div>
+            <div class="goal-zone" data-zone="R3C3" data-label="Low MR" onclick="selectARZone('R3C3')"></div>
+            <div class="goal-zone" data-zone="R3C4" data-label="Low R" onclick="selectARZone('R3C4')"></div>
+            <div class="goal-zone" data-zone="R4C1" data-label="Floor L" onclick="selectARZone('R4C1')"></div>
+            <div class="goal-zone" data-zone="R4C2" data-label="Floor ML" onclick="selectARZone('R4C2')"></div>
+            <div class="goal-zone" data-zone="R4C3" data-label="Floor MR" onclick="selectARZone('R4C3')"></div>
+            <div class="goal-zone" data-zone="R4C4" data-label="Floor R" onclick="selectARZone('R4C4')"></div>
+          </div>
+          <div class="gk-silhouette" id="ar-gk" style="left:40%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ar-bottom">
+      <div class="gk-presets">
+        <span class="preset-btn" onclick="setGKPosition(8)">Far L</span>
+        <span class="preset-btn" onclick="setGKPosition(28)">Left</span>
+        <span class="preset-btn" onclick="setGKPosition(40)">Center</span>
+        <span class="preset-btn" onclick="setGKPosition(52)">Right</span>
+        <span class="preset-btn" onclick="setGKPosition(72)">Far R</span>
+      </div>
+      <div class="ar-instructions" id="ar-instructions">Tap a target square, take your shot, then log result</div>
+      <div class="ar-log-row">
+        <button class="log-btn goal" onclick="logARShot('goal')" disabled>Goal</button>
+        <button class="log-btn save" onclick="logARShot('save')" disabled>Save</button>
+        <button class="log-btn miss" onclick="logARShot('miss')" disabled>Miss</button>
+      </div>
+      <div class="ar-controls-row">
+        <button class="ctrl-btn" id="ar-toggle-overlay" onclick="toggleAROverlay()">Hide</button>
+        <button class="ctrl-btn" onclick="showStats()">Stats</button>
+        <button class="ctrl-btn" onclick="showScreen('home')">← Home</button>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn active"><span class="nav-icon">📷</span><span class="nav-label">AR</span></button>
+    <button class="nav-btn" onclick="startSim()"><span class="nav-icon">⚽</span><span class="nav-label">Sim</span></button>
+    <button class="nav-btn" onclick="showStats()"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+    <button class="nav-btn" onclick="showRefs()"><span class="nav-icon">📚</span><span class="nav-label">Refs</span></button>
+  </div>
+</div>
+
+<!-- SIM v2 -->
+<div class="screen hidden has-nav" id="sim-screen">
+  <div class="sim-sun"></div>
+
+  <div class="sim-header">
+    <div class="sim-title-block">
+      <div class="sim-title">Tactical Sim</div>
+      <div class="sim-subtitle" id="sim-subtitle">Tap pitch to position</div>
+    </div>
+    <div class="sim-stats-pill">
+      <div class="sim-stat"><div class="sim-stat-val green" id="sim-goals">0</div><div class="sim-stat-lbl">G</div></div>
+      <div class="sim-stat"><div class="sim-stat-val" id="sim-attempts">0</div><div class="sim-stat-lbl">A</div></div>
+      <div class="sim-stat"><div class="sim-stat-val amber" id="sim-pct">—</div><div class="sim-stat-lbl">%</div></div>
+      <div class="sim-stat"><div class="sim-stat-val" id="sim-decision-q">—</div><div class="sim-stat-lbl">Dec</div></div>
+    </div>
+  </div>
+
+  <div class="difficulty-row">
+    <span class="diff-label">GK:</span>
+    <button class="diff-btn active" id="diff-easy" onclick="setDifficulty('easy')">Beginner</button>
+    <button class="diff-btn" id="diff-med" onclick="setDifficulty('medium')">Elite</button>
+    <button class="diff-btn" id="diff-hard" onclick="setDifficulty('hard')">World Class</button>
+  </div>
+
+  <!-- Tactical pitch (overhead view) -->
+  <div class="pitch-view-container">
+    <div class="pitch-tactical" id="pitch-tactical" onclick="placeShooter(event)">
+      <div class="pen-box"></div>
+      <div class="pen-arc"></div>
+      <div class="six-yard"></div>
+      <div class="goal-line"></div>
+      <div class="pen-spot"></div>
+      <svg class="angle-svg" id="angle-svg" viewBox="0 0 200 140" preserveAspectRatio="none"></svg>
+      <div class="gk-pitch" id="gk-pitch" style="top:7%;left:50%"></div>
+      <div class="defender-pitch" id="defender-pitch" style="top:30%;left:50%;display:none"></div>
+      <div class="shooter-pitch" id="shooter-pitch" style="top:55%;left:50%"></div>
+      <div class="tap-hint" id="tap-hint">Tap to move</div>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics-strip">
+    <div class="metric-box">
+      <div class="metric-val" id="metric-distance">—</div>
+      <div class="metric-lbl">Dist (m)</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-val" id="metric-angle">—</div>
+      <div class="metric-lbl">Angle°</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-val" id="metric-xg">—</div>
+      <div class="metric-lbl">xG</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-val" id="metric-gkdist">—</div>
+      <div class="metric-lbl">GK m</div>
+    </div>
+  </div>
+
+  <!-- Goal with zones -->
+  <div class="goal-3d-container">
+    <div class="goal-3d" id="sim-goal">
+      <div class="gk-behavior" id="gk-behavior-badge">Setting</div>
+      <div class="shot-zones" id="shot-zones">
+        <div class="shot-zone" data-zone="R1C1" data-label="High L" onclick="selectSimZone('R1C1')"></div>
+        <div class="shot-zone" data-zone="R1C2" data-label="High ML" onclick="selectSimZone('R1C2')"></div>
+        <div class="shot-zone" data-zone="R1C3" data-label="High MR" onclick="selectSimZone('R1C3')"></div>
+        <div class="shot-zone" data-zone="R1C4" data-label="High R" onclick="selectSimZone('R1C4')"></div>
+        <div class="shot-zone" data-zone="R2C1" data-label="Mid L" onclick="selectSimZone('R2C1')"></div>
+        <div class="shot-zone" data-zone="R2C2" data-label="Mid ML" onclick="selectSimZone('R2C2')"></div>
+        <div class="shot-zone" data-zone="R2C3" data-label="Mid MR" onclick="selectSimZone('R2C3')"></div>
+        <div class="shot-zone" data-zone="R2C4" data-label="Mid R" onclick="selectSimZone('R2C4')"></div>
+        <div class="shot-zone" data-zone="R3C1" data-label="Low L" onclick="selectSimZone('R3C1')"></div>
+        <div class="shot-zone" data-zone="R3C2" data-label="Low ML" onclick="selectSimZone('R3C2')"></div>
+        <div class="shot-zone" data-zone="R3C3" data-label="Low MR" onclick="selectSimZone('R3C3')"></div>
+        <div class="shot-zone" data-zone="R3C4" data-label="Low R" onclick="selectSimZone('R3C4')"></div>
+        <div class="shot-zone" data-zone="R4C1" data-label="Floor L" onclick="selectSimZone('R4C1')"></div>
+        <div class="shot-zone" data-zone="R4C2" data-label="Floor ML" onclick="selectSimZone('R4C2')"></div>
+        <div class="shot-zone" data-zone="R4C3" data-label="Floor MR" onclick="selectSimZone('R4C3')"></div>
+        <div class="shot-zone" data-zone="R4C4" data-label="Floor R" onclick="selectSimZone('R4C4')"></div>
+      </div>
+      <div class="gk-sim" id="sim-gk" style="left:41%"></div>
+    </div>
+    <div class="goal-shadow"></div>
+  </div>
+
+  <!-- Decision timer -->
+  <div class="decision-bar-wrap">
+    <div class="decision-bar-bg"><div class="decision-bar-fill" id="decision-bar"></div></div>
+    <div class="decision-bar-label" id="decision-label">Decision window</div>
+  </div>
+
+  <!-- Bottom controls -->
+  <div class="sim-controls">
+    <div class="scenario-btn-row">
+      <button class="scenario-btn active" id="scen-static" onclick="setScenario('static')">Static</button>
+      <button class="scenario-btn" id="scen-dynamic" onclick="setScenario('dynamic')">Dynamic</button>
+      <button class="scenario-btn" id="scen-pressure" onclick="setScenario('pressure')">+ Defender</button>
+      <button class="scenario-btn" onclick="newScenario()">↻ New</button>
+    </div>
+    <button id="pause-btn" class="pause-btn" onclick="toggleSimPause()" disabled>Pause</button>
+  </div>
+
+  <!-- Outcome flash -->
+  <div class="outcome-flash" id="outcome-flash">
+    <div class="outcome-card">
+      <div class="outcome-emoji" id="outcome-emoji">⚽</div>
+      <div class="outcome-word" id="outcome-word">Goal</div>
+      <div class="outcome-sub" id="outcome-sub"></div>
+      <div class="outcome-stats">
+        <div class="outcome-mini-stat">
+          <div class="outcome-mini-val" id="out-xg">—</div>
+          <div class="outcome-mini-lbl">xG</div>
+        </div>
+        <div class="outcome-mini-stat">
+          <div class="outcome-mini-val" id="out-dist">—</div>
+          <div class="outcome-mini-lbl">Dist</div>
+        </div>
+        <div class="outcome-mini-stat">
+          <div class="outcome-mini-val" id="out-react">—</div>
+          <div class="outcome-mini-lbl">Reaction</div>
+        </div>
+      </div>
+      <div class="decision-quality" id="decision-quality"></div>
+      <button class="outcome-next-btn" onclick="newScenario()">Next Scenario →</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" onclick="startAR()"><span class="nav-icon">📷</span><span class="nav-label">AR</span></button>
+    <button class="nav-btn active"><span class="nav-icon">⚽</span><span class="nav-label">Sim</span></button>
+    <button class="nav-btn" onclick="showStats()"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+    <button class="nav-btn" onclick="showRefs()"><span class="nav-icon">📚</span><span class="nav-label">Refs</span></button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="screen hidden has-nav" id="stats-screen">
+  <div class="stats-header">
+    <div>
+      <div class="stats-title">Session</div>
+      <div class="stats-subtitle" id="stats-session-label">No shots logged yet</div>
+    </div>
+    <button class="ctrl-btn" onclick="clearStats()" style="max-width:80px;font-size:11px;padding:8px">Clear</button>
+  </div>
+  <div class="stats-content">
+    <div class="stat-cards-grid">
+      <div class="stat-card bg-green"><div class="stat-card-val" id="stat-goals">0</div><div class="stat-card-lbl">Goals</div></div>
+      <div class="stat-card bg-amber"><div class="stat-card-val" id="stat-saves">0</div><div class="stat-card-lbl">Saves</div></div>
+      <div class="stat-card bg-red"><div class="stat-card-val" id="stat-misses">0</div><div class="stat-card-lbl">Misses</div></div>
+    </div>
+    <div class="big-stat-row">
+      <div class="big-stat">
+        <div class="big-stat-val" id="stat-conversion">—</div>
+        <div class="big-stat-lbl">Conv. %</div>
+      </div>
+      <div class="big-stat">
+        <div class="big-stat-val" id="stat-decision-pct">—</div>
+        <div class="big-stat-lbl">Decision %</div>
+      </div>
+    </div>
+    <div class="big-stat-row">
+      <div class="big-stat">
+        <div class="big-stat-val" id="stat-avg-xg" style="font-size:24px">—</div>
+        <div class="big-stat-lbl">Avg xG</div>
+      </div>
+      <div class="big-stat">
+        <div class="big-stat-val" id="stat-best-zone" style="font-size:18px">—</div>
+        <div class="big-stat-lbl">Best Zone</div>
+      </div>
+    </div>
+    <div id="insights-box"></div>
+    <div class="section-title">Zone Performance</div>
+    <div class="heatmap-container">
+      <div class="heatmap-goal" id="heatmap-goal">
+        <div class="heatmap-cell" data-zone="R1C1"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R1C2"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R1C3"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R1C4"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R2C1"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R2C2"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R2C3"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R2C4"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R3C1"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R3C2"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R3C3"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R3C4"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R4C1"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R4C2"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R4C3"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+        <div class="heatmap-cell" data-zone="R4C4"><div class="heatmap-cell-bg"></div><div class="heatmap-pct">—</div><div class="heatmap-count">0 shots</div></div>
+      </div>
+      <div class="heatmap-baseline"></div>
+      <div class="heatmap-legend">
+        <span>Cold</span>
+        <div class="legend-bar"></div>
+        <span>Hot</span>
+      </div>
+    </div>
+    <div class="section-title">Shot Log</div>
+    <div class="shot-log" id="shot-log">
+      <div class="log-empty">No shots yet — go score some.</div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" onclick="startAR()"><span class="nav-icon">📷</span><span class="nav-label">AR</span></button>
+    <button class="nav-btn" onclick="startSim()"><span class="nav-icon">⚽</span><span class="nav-label">Sim</span></button>
+    <button class="nav-btn active"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+    <button class="nav-btn" onclick="showRefs()"><span class="nav-icon">📚</span><span class="nav-label">Refs</span></button>
+  </div>
+</div>
+
+<!-- REFERENCES -->
+<div class="screen hidden has-nav" id="refs-screen">
+  <div class="refs-header">
+    <div class="refs-title">Research</div>
+    <div class="refs-sub">The science behind every feature</div>
+  </div>
+  <div class="refs-content">
+
+    <div class="ref-section">
+      <div class="ref-section-title">Shot Geometry &amp; xG</div>
+      <div class="ref-section-feat">Tactical pitch shows real-time angle &amp; distance. xG calculated from goal-mouth angle (Sumpter formula) plus GK and defender pressure.</div>
+      <ul class="ref-list">
+        <li>Sumpter, D. (2017). <i>The geometry of shooting</i>. Soccermatics. <a href="https://soccermatics.medium.com/the-geometry-of-shooting-7cbdd0d5da3b">link</a></li>
+        <li>de Boode, V. (Ajax). Goalkeeper reaction time research cited in Sumpter (2017).</li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Keeper Positioning</div>
+      <div class="ref-section-feat">GK positions on the bisector line between shooter and goal-center, then closes down within 3m (FA "3-metre rule").</div>
+      <ul class="ref-list">
+        <li>FIFA Training Centre / Dittmer, T. — Goalkeeper's positioning in &amp; out of possession. <a href="https://www.fifatrainingcentre.com/en/practice/elite-sessions/goalkeeper/in_and_out_of_possession.php">link</a></li>
+        <li>Top Goalkeeping (2025). <i>Goalkeeper Positioning: Where to Stand In Match Situations</i>.</li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Decision Window / Temporal Occlusion</div>
+      <div class="ref-section-feat">Countdown bar mimics real time pressure. Shots taken under low time = lower decision-quality score. Backed by occlusion-paradigm meta-analysis showing transfer to real performance.</div>
+      <ul class="ref-list">
+        <li>Broadbent et al. (2024). <i>Accelerating Visual Anticipation in Sport Through Temporal Occlusion Training: A Meta-Analysis</i>. Sports Medicine. <a href="https://link.springer.com/article/10.1007/s40279-024-02073-6">link</a></li>
+        <li>Hohmann et al. (2018). <i>Effects of Video-Based Visual Training on Decision-Making and Reactive Agility in Adolescent Football Players</i>. PMC.</li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Perception–Action Cycle</div>
+      <div class="ref-section-feat">Shooter must position, scan GK, decide zone, execute — modeled on the three-stage cognitive cycle of elite play. Random GK movement &amp; defender recovery force in-the-moment recalibration.</div>
+      <ul class="ref-list">
+        <li>Vestberg et al. (2024). <i>Cognition in elite soccer players: a general model</i>. Frontiers in Psychology. <a href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1477262/full">link</a></li>
+        <li>Dicks et al. (2010). Perception–action coupling in goalkeepers (lab vs. field).</li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Cognitive Training Apps That Inspired This Build</div>
+      <div class="ref-section-feat">Live HUD &amp; scenario randomization influenced by Rezzil; cognitive metrics (decision quality, scan rate concept) from Be Your Best.</div>
+      <ul class="ref-list">
+        <li>Rezzil — VR cognitive sports trainer used by Premier League clubs. <a href="https://rezzil.com/">link</a></li>
+        <li>Be Your Best — VR scanning &amp; decision-making for soccer (28% scan-rate gain in 9 weeks). <a href="https://cybernews.com/health-tech/best-soccer-training-apps/">link</a></li>
+        <li>Soccer IntelliGym — computer-based decision training. <a href="https://soccer.intelligym.com/">link</a></li>
+        <li>A-Champs ROX / Goal Station — multi-sensory perception-action pods.</li>
+      </ul>
+    </div>
+
+    <div class="ref-section">
+      <div class="ref-section-title">Heatmap &amp; Pattern Recognition</div>
+      <div class="ref-section-feat">Zone heatmap helps you avoid predictability — pattern recognition is a known expert advantage.</div>
+      <ul class="ref-list">
+        <li>Williams et al. (2012). Pattern recognition expertise in soccer.</li>
+        <li>Mann et al. (2007). Perceptual-cognitive expertise as a defining feature of expert performance.</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" onclick="startAR()"><span class="nav-icon">📷</span><span class="nav-label">AR</span></button>
+    <button class="nav-btn" onclick="startSim()"><span class="nav-icon">⚽</span><span class="nav-label">Sim</span></button>
+    <button class="nav-btn" onclick="showStats()"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+    <button class="nav-btn active"><span class="nav-icon">📚</span><span class="nav-label">Refs</span></button>
+  </div>
+</div>
+
+<script>
+  // ============ STATE ============
+  const state = {
+    shots: [],
+    arGKPos: 40,
+    arSelectedZone: null,
+    arOverlayHidden: false,
+    arGKDragReady: false,
+    cameraStream: null,
+    // Sim — tactical
+    shooterPos: { x: 50, y: 55 }, // % on pitch
+    gkPos:      { x: 50, y: 7 },  // % on pitch
+    defenderPos: { x: 50, y: 30 },
+    simSelectedZone: null,
+    simDifficulty: 'easy',
+    simScenario: 'static',
+    simInProgress: false,
+    simPaused: false,
+    decisionStartTime: null,
+    decisionElapsedBeforePause: 0,
+    pauseStartedAt: null,
+    decisionWindowMs: 4000,
+    decisionTimer: null,
+    decisionMovementTimer: null,
+    shooterMoveKeys: { up: false, down: false, left: false, right: false },
+    shooterMoveFrame: null,
+    shooterMoveLastTime: null,
+    currentMetrics: { distance: 0, angle: 0, xg: 0, gkDist: 0 },
+  };
+
+  const ZONES = [
+    'R1C1','R1C2','R1C3','R1C4',
+    'R2C1','R2C2','R2C3','R2C4',
+    'R3C1','R3C2','R3C3','R3C4',
+    'R4C1','R4C2','R4C3','R4C4'
+  ];
+  const ZONE_NAMES = {
+    R1C1:'High Left', R1C2:'High Mid Left', R1C3:'High Mid Right', R1C4:'High Right',
+    R2C1:'Mid Left', R2C2:'Mid Mid Left', R2C3:'Mid Mid Right', R2C4:'Mid Right',
+    R3C1:'Low Left', R3C2:'Low Mid Left', R3C3:'Low Mid Right', R3C4:'Low Right',
+    R4C1:'Floor Left', R4C2:'Floor Mid Left', R4C3:'Floor Mid Right', R4C4:'Floor Right',
+    TL:'Top Left', TC:'Top Center', TR:'Top Right', BL:'Bot Left', BC:'Bot Center', BR:'Bot Right'
+  };
+
+  function zoneRow(zone) {
+    const match = /^R(\d)C\d$/.exec(zone);
+    if (match) return Number(match[1]);
+    return zone.startsWith('T') ? 1 : 4;
+  }
+
+  function zoneCol(zone) {
+    const match = /^R\dC(\d)$/.exec(zone);
+    if (match) return Number(match[1]);
+    if (zone.endsWith('L')) return 1;
+    if (zone.endsWith('R')) return 4;
+    return 2.5;
+  }
+
+  function zoneIsTop(zone) { return zoneRow(zone) <= 2; }
+  function zoneIsBottom(zone) { return zoneRow(zone) >= 3; }
+  function zoneIsCorner(zone) {
+    const row = zoneRow(zone);
+    const col = zoneCol(zone);
+    return row === 1 && (col === 1 || col === 4);
+  }
+  function zoneSide(zone) {
+    const col = zoneCol(zone);
+    if (col <= 2) return 'L';
+    return 'R';
+  }
+
+  // Pitch coordinate constants — modeling vertical half-pitch
+  // y=0 is goal line, y=100 is far end. Goal width covers x=43..57 (14% of width).
+  // We'll scale: 100% pitch height = 35 real meters (penalty area context).
+  const PITCH_M_PER_PCT_Y = 0.35; // 35m / 100%
+  const PITCH_M_PER_PCT_X = 0.45; // ~45m wide visible area
+  const GOAL_HALF_WIDTH_M = 3.66; // half of 7.32m goal
+
+  // ============ SCREENS ============
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+  function startAR() {
+    showScreen('ar-screen');
+    if (!state.cameraStream) {
+      document.getElementById('cam-permission').style.display = 'flex';
+      document.getElementById('ar-ui').style.display = 'none';
+    }
+  }
+  function startSim() {
+    showScreen('sim-screen');
+    newScenario();
+  }
+  function showStats() { showScreen('stats-screen'); renderStats(); }
+  function showRefs() { showScreen('refs-screen'); }
+
+  function clearDecisionTimers() {
+    if (state.decisionTimer) {
+      clearTimeout(state.decisionTimer);
+      state.decisionTimer = null;
+    }
+    if (state.decisionMovementTimer) {
+      clearInterval(state.decisionMovementTimer);
+      state.decisionMovementTimer = null;
+    }
+  }
+
+  function isSimVisible() {
+    return !document.getElementById('sim-screen').classList.contains('hidden');
+  }
+
+  // ============ AR ============
+  function setCameraError(message) {
+    const el = document.getElementById('cam-error');
+    if (!el) return;
+    el.textContent = message || '';
+    el.style.display = message ? 'block' : 'none';
+  }
+
+  async function requestCamera() {
+    setCameraError('');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError('Camera access is not available in this browser context. Try opening this page from localhost or a mobile browser with camera permissions.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } }, audio: false
+      });
+      state.cameraStream = stream;
+      document.getElementById('camera-feed').srcObject = stream;
+      document.getElementById('cam-permission').style.display = 'none';
+      document.getElementById('ar-ui').style.display = 'flex';
+      setupGKDrag();
+    } catch (err) {
+      const reason = err && err.name ? `${err.name}: ` : '';
+      setCameraError(`${reason}Camera access was blocked or no camera was available. Allow camera permission, or try this page from localhost on the device camera you want to use.`);
+    }
+  }
+  function setGKPosition(pct) {
+    state.arGKPos = pct;
+    document.getElementById('ar-gk').style.left = pct + '%';
+  }
+  function setupGKDrag() {
+    if (state.arGKDragReady) return;
+    state.arGKDragReady = true;
+    const gk = document.getElementById('ar-gk');
+    const frame = document.getElementById('ar-goal-frame');
+    let dragging = false;
+    const start = (e) => { dragging = true; e.preventDefault(); };
+    const move = (e) => {
+      if (!dragging) return;
+      const rect = frame.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const pct = Math.max(0, Math.min(78, (x / rect.width) * 100 - 11));
+      gk.style.left = pct + '%';
+      state.arGKPos = pct;
+    };
+    const end = () => { dragging = false; };
+    gk.addEventListener('mousedown', start);
+    gk.addEventListener('touchstart', start, {passive:false});
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', move, {passive:false});
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  }
+  function setARLogButtonsEnabled(enabled) {
+    document.querySelectorAll('.ar-log-row .log-btn').forEach(btn => {
+      btn.disabled = !enabled;
+    });
+  }
+  function selectARZone(zone) {
+    document.querySelectorAll('#ar-goal-zones .goal-zone').forEach(z => z.classList.remove('targeted'));
+    document.querySelector(`#ar-goal-zones .goal-zone[data-zone="${zone}"]`).classList.add('targeted');
+    state.arSelectedZone = zone;
+    setARLogButtonsEnabled(true);
+    document.getElementById('ar-instructions').textContent = `${ZONE_NAMES[zone]} selected - take your shot, then log it`;
+  }
+  function logARShot(outcome) {
+    if (!state.arSelectedZone) {
+      document.getElementById('ar-instructions').textContent = 'Pick a target square before logging the shot.';
+      setARLogButtonsEnabled(false);
+      return;
+    }
+    const zone = state.arSelectedZone;
+    state.shots.push({ mode:'ar', zone, outcome, gkPos: Math.round(state.arGKPos), time: Date.now() });
+    updateARStats();
+    document.querySelectorAll('#ar-goal-zones .goal-zone').forEach(z => z.classList.remove('targeted'));
+    state.arSelectedZone = null;
+    setARLogButtonsEnabled(false);
+    document.getElementById('ar-instructions').textContent = `Logged ${outcome.toUpperCase()}. Tap a target square for the next shot.`;
+  }
+  function updateARStats() {
+    const arShots = state.shots.filter(s => s.mode === 'ar');
+    const goals = arShots.filter(s => s.outcome === 'goal').length;
+    document.getElementById('ar-goals').textContent = goals;
+    document.getElementById('ar-attempts').textContent = arShots.length;
+    document.getElementById('ar-pct').textContent = arShots.length ? Math.round(goals/arShots.length*100) + '%' : '—';
+  }
+  function toggleAROverlay() {
+    state.arOverlayHidden = !state.arOverlayHidden;
+    document.getElementById('goal-overlay').style.opacity = state.arOverlayHidden ? '0.15' : '1';
+    document.getElementById('ar-toggle-overlay').textContent = state.arOverlayHidden ? 'Show' : 'Hide';
+  }
+
+  // ============ SIM v2 ============
+  function setDifficulty(level) {
+    state.simDifficulty = level;
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(level === 'easy' ? 'diff-easy' : level === 'medium' ? 'diff-med' : 'diff-hard').classList.add('active');
+  }
+
+  function setScenario(s) {
+    state.simScenario = s;
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('scen-' + s).classList.add('active');
+    newScenario();
+  }
+
+  function getDecisionElapsed() {
+    if (!state.decisionStartTime) return 0;
+    if (state.simPaused) return state.decisionElapsedBeforePause;
+    return Math.min(state.decisionWindowMs, performance.now() - state.decisionStartTime);
+  }
+
+  function updatePauseButton() {
+    const btn = document.getElementById('pause-btn');
+    if (!btn) return;
+    btn.disabled = state.simInProgress;
+    btn.textContent = state.simPaused ? 'Resume' : 'Pause';
+    btn.classList.toggle('active', state.simPaused);
+  }
+
+  function animateDecisionBarFrom(remainingMs) {
+    const bar = document.getElementById('decision-bar');
+    const pct = Math.max(0, Math.min(100, (remainingMs / state.decisionWindowMs) * 100));
+    bar.style.transition = 'none';
+    bar.style.width = pct + '%';
+    requestAnimationFrame(() => {
+      bar.style.transition = `width ${remainingMs}ms linear`;
+      bar.style.width = '0%';
+    });
+  }
+
+  function freezeDecisionBar() {
+    const bar = document.getElementById('decision-bar');
+    const remainingMs = Math.max(0, state.decisionWindowMs - state.decisionElapsedBeforePause);
+    const pct = Math.max(0, Math.min(100, (remainingMs / state.decisionWindowMs) * 100));
+    bar.style.transition = 'none';
+    bar.style.width = pct + '%';
+  }
+
+  function scheduleDecisionTimeout(remainingMs) {
+    if (state.decisionTimer) clearTimeout(state.decisionTimer);
+    state.decisionTimer = setTimeout(() => {
+      if (!state.simInProgress && !state.simPaused) {
+        triggerHesitationFail();
+      }
+    }, remainingMs);
+  }
+
+  function startDecisionWindow() {
+    state.decisionElapsedBeforePause = 0;
+    state.pauseStartedAt = null;
+    state.decisionStartTime = performance.now();
+    animateDecisionBarFrom(state.decisionWindowMs);
+    scheduleDecisionTimeout(state.decisionWindowMs);
+    document.getElementById('decision-label').textContent = 'Decision window - shoot before time runs out!';
+  }
+
+  function startScenarioMovement() {
+    if (state.decisionMovementTimer || (state.simScenario !== 'dynamic' && state.simScenario !== 'pressure')) return;
+    let tickCount = 0;
+    state.decisionMovementTimer = setInterval(() => {
+      if (state.simInProgress || state.simPaused) return;
+      tickCount++;
+      // Random GK shuffle
+      const jitter = state.simDifficulty === 'easy' ? 1.5 :
+                     state.simDifficulty === 'medium' ? 0.8 : 0.4;
+      state.gkPos.x += (Math.random() - 0.5) * jitter * 2;
+      state.gkPos.x = Math.max(35, Math.min(65, state.gkPos.x));
+      document.getElementById('gk-pitch').style.left = state.gkPos.x + '%';
+      renderAngleSVG();
+
+      // Defender closes in pressure mode
+      if (state.simScenario === 'pressure') {
+        const dx = state.shooterPos.x - state.defenderPos.x;
+        const dy = state.shooterPos.y - state.defenderPos.y;
+        const speed = state.simDifficulty === 'easy' ? 0.4 :
+                      state.simDifficulty === 'medium' ? 0.7 : 1.1;
+        state.defenderPos.x += dx * 0.04 * speed;
+        state.defenderPos.y += dy * 0.04 * speed;
+        document.getElementById('defender-pitch').style.left = state.defenderPos.x + '%';
+        document.getElementById('defender-pitch').style.top = state.defenderPos.y + '%';
+      }
+
+      // Random charge event (rare)
+      if (tickCount > 8 && Math.random() < 0.04) {
+        const t = 0.55;
+        state.gkPos.y = Math.min(state.shooterPos.y - 5, state.gkPos.y + (state.shooterPos.y - state.gkPos.y) * t);
+        document.getElementById('gk-pitch').style.top = state.gkPos.y + '%';
+        document.getElementById('gk-behavior-badge').textContent = 'Charging!';
+      }
+
+      updateMetrics();
+    }, 250);
+  }
+
+  function toggleSimPause() {
+    if (state.simInProgress || !state.decisionStartTime) return;
+    if (state.simPaused) {
+      state.simPaused = false;
+      const remainingMs = Math.max(0, state.decisionWindowMs - state.decisionElapsedBeforePause);
+      state.decisionStartTime = performance.now() - state.decisionElapsedBeforePause;
+      animateDecisionBarFrom(remainingMs);
+      scheduleDecisionTimeout(remainingMs);
+      startScenarioMovement();
+      if (hasShooterMoveInput()) ensureShooterMoveLoop();
+      document.getElementById('decision-label').textContent = 'Decision window - shoot before time runs out!';
+    } else {
+      state.decisionElapsedBeforePause = getDecisionElapsed();
+      state.pauseStartedAt = performance.now();
+      state.simPaused = true;
+      resetShooterMoveKeys();
+      clearDecisionTimers();
+      freezeDecisionBar();
+      document.getElementById('decision-label').textContent = 'Paused';
+    }
+    updatePauseButton();
+  }
+
+  function setShooterPosition(x, y) {
+    const constrainedX = Math.max(8, Math.min(92, x));
+    const constrainedY = Math.max(20, Math.min(90, y));
+    state.shooterPos = { x: constrainedX, y: constrainedY };
+    document.getElementById('shooter-pitch').style.left = constrainedX + '%';
+    document.getElementById('shooter-pitch').style.top = constrainedY + '%';
+    document.getElementById('tap-hint').style.display = 'none';
+    updateGKPositioning();
+    updateMetrics();
+  }
+
+  function resetShooterMoveKeys() {
+    state.shooterMoveKeys = { up: false, down: false, left: false, right: false };
+    state.shooterMoveLastTime = null;
+  }
+
+  function hasShooterMoveInput() {
+    return Object.values(state.shooterMoveKeys).some(Boolean);
+  }
+
+  function runShooterMoveLoop(now) {
+    state.shooterMoveFrame = null;
+    if (!isSimVisible() || state.simInProgress || state.simPaused || !hasShooterMoveInput()) {
+      state.shooterMoveLastTime = null;
+      return;
+    }
+
+    const last = state.shooterMoveLastTime || now;
+    const dt = Math.min(32, now - last);
+    state.shooterMoveLastTime = now;
+
+    const keys = state.shooterMoveKeys;
+    let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    let dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+    if (dx || dy) {
+      const length = Math.hypot(dx, dy);
+      dx /= length;
+      dy /= length;
+      const speedPctPerSecond = 28;
+      setShooterPosition(
+        state.shooterPos.x + dx * speedPctPerSecond * dt / 1000,
+        state.shooterPos.y + dy * speedPctPerSecond * dt / 1000
+      );
+    }
+
+    state.shooterMoveFrame = requestAnimationFrame(runShooterMoveLoop);
+  }
+
+  function ensureShooterMoveLoop() {
+    if (!state.shooterMoveFrame) {
+      state.shooterMoveFrame = requestAnimationFrame(runShooterMoveLoop);
+    }
+  }
+
+  function handleShooterKey(event, isDown) {
+    const keyMap = {
+      ArrowUp: 'up',
+      ArrowDown: 'down',
+      ArrowLeft: 'left',
+      ArrowRight: 'right'
+    };
+    const direction = keyMap[event.key];
+    if (!direction || !isSimVisible()) return;
+
+    event.preventDefault();
+    state.shooterMoveKeys[direction] = isDown;
+    if (isDown && !state.simInProgress && !state.simPaused) {
+      ensureShooterMoveLoop();
+    }
+  }
+
+  // Place shooter on pitch via tap
+  function placeShooter(event) {
+    if (state.simInProgress || state.simPaused) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    setShooterPosition(x, y);
+  }
+
+  // GK auto-positions: bisector line, depth based on shooter distance
+  // FA 3-metre rule: come within 3m if possible, else narrow angle from line
+  function updateGKPositioning() {
+    const sx = state.shooterPos.x;
+    const sy = state.shooterPos.y;
+    const goalCenterX = 50;
+    const goalY = 0;
+
+    // Distance from shooter to goal center (in meters)
+    const dxM = (sx - goalCenterX) * PITCH_M_PER_PCT_X;
+    const dyM = (sy - goalY) * PITCH_M_PER_PCT_Y;
+    const distM = Math.sqrt(dxM*dxM + dyM*dyM);
+
+    // GK aims for the bisector. Place along ray from goal center to shooter.
+    // Depth from goal line: based on distance, GK tries to come out 1/3 to 1/2 of distance
+    // capped by penalty area depth (~16m -> ~46% of pitch height in our scale)
+    const idealDepthM = Math.min(Math.max(distM * 0.35, 1.5), 16);
+    const idealDepthPct = idealDepthM / PITCH_M_PER_PCT_Y;
+
+    // Add some difficulty-based variance (better keepers position better)
+    const errorPct = state.simDifficulty === 'easy' ? 8 :
+                     state.simDifficulty === 'medium' ? 4 : 1.5;
+    const errX = (Math.random() - 0.5) * errorPct;
+
+    // Scale depth toward shooter
+    const t = idealDepthPct / sy;  // fraction along ray
+    const gkX = goalCenterX + (sx - goalCenterX) * t + errX;
+    const gkY = idealDepthPct;
+
+    state.gkPos = { x: Math.max(35, Math.min(65, gkX)), y: gkY };
+    document.getElementById('gk-pitch').style.left = state.gkPos.x + '%';
+    document.getElementById('gk-pitch').style.top = state.gkPos.y + '%';
+
+    // Render angle visualization
+    renderAngleSVG();
+  }
+
+  function renderAngleSVG() {
+    const svg = document.getElementById('angle-svg');
+    const sx = state.shooterPos.x * 2; // viewBox is 200x140
+    const sy = state.shooterPos.y * 1.4;
+    // Goal posts (visualized within viewBox)
+    const postLX = 43 * 2;
+    const postRX = 57 * 2;
+    const postY = 0;
+    svg.innerHTML = `
+      <polygon class="angle-line" points="${sx},${sy} ${postLX},${postY} ${postRX},${postY}" />
+      <line x1="${sx}" y1="${sy}" x2="${postLX}" y2="${postY}" stroke="#FF7A2E" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+      <line x1="${sx}" y1="${sy}" x2="${postRX}" y2="${postY}" stroke="#FF7A2E" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
+    `;
+  }
+
+  function updateMetrics() {
+    const sx = state.shooterPos.x;
+    const sy = state.shooterPos.y;
+    const goalCenterX = 50;
+    const dxM = (sx - goalCenterX) * PITCH_M_PER_PCT_X;
+    const dyM = sy * PITCH_M_PER_PCT_Y;
+    const distM = Math.sqrt(dxM*dxM + dyM*dyM);
+
+    // Goal angle (Sumpter formula): tan(θ) = (7.32 * y) / (x² + y² - (7.32/2)²)
+    // x = lateral offset from goal-center, y = distance along pitch (depth)
+    const x = Math.abs(dxM);
+    const y = dyM;
+    const W = 7.32;
+    const denom = (x*x + y*y - (W/2)*(W/2));
+    let angleRad = 0;
+    if (denom > 0) {
+      const tan = (W * y) / denom;  // correct geometric form
+      angleRad = Math.atan(tan);
+    } else {
+      // Behind line (shouldn't happen given constraints)
+      angleRad = Math.PI;
+    }
+    const angleDeg = Math.max(0, angleRad * 180 / Math.PI);
+
+    // GK distance to shooter (m)
+    const gkDx = (state.shooterPos.x - state.gkPos.x) * PITCH_M_PER_PCT_X;
+    const gkDy = (state.shooterPos.y - state.gkPos.y) * PITCH_M_PER_PCT_Y;
+    const gkDistM = Math.sqrt(gkDx*gkDx + gkDy*gkDy);
+
+    // xG: simple model based on angle & distance
+    // Base xG = sigmoid(0.05 + 0.4*angle/30 - 0.04*distance)
+    let baseXg = 1 / (1 + Math.exp(-(0.5 - distM*0.10 + angleDeg*0.025)));
+    // GK pressure: closer GK reduces xG
+    const gkPressure = Math.max(0, 1 - gkDistM/8);
+    baseXg *= (1 - gkPressure * 0.45);
+    // Defender pressure
+    if (state.simScenario === 'pressure') {
+      const ddx = (state.shooterPos.x - state.defenderPos.x) * PITCH_M_PER_PCT_X;
+      const ddy = (state.shooterPos.y - state.defenderPos.y) * PITCH_M_PER_PCT_Y;
+      const ddDist = Math.sqrt(ddx*ddx + ddy*ddy);
+      const defPressure = Math.max(0, 1 - ddDist/6);
+      baseXg *= (1 - defPressure * 0.35);
+    }
+    const xg = Math.max(0.02, Math.min(0.95, baseXg));
+
+    state.currentMetrics = { distance: distM, angle: angleDeg, xg, gkDist: gkDistM };
+
+    document.getElementById('metric-distance').textContent = distM.toFixed(1);
+    document.getElementById('metric-angle').textContent = angleDeg.toFixed(0);
+    const xgEl = document.getElementById('metric-xg');
+    xgEl.textContent = xg.toFixed(2);
+    xgEl.className = 'metric-val ' + (xg < 0.15 ? 'xg-low' : xg < 0.4 ? 'xg-mid' : 'xg-high');
+    document.getElementById('metric-gkdist').textContent = gkDistM.toFixed(1);
+
+    // Update GK in goal-frame view based on lateral position
+    // GK in goal: map state.gkPos.x relative to goal posts (43..57) -> 0..78%
+    const goalCenterPct = 50;
+    const lateralOffset = state.gkPos.x - goalCenterPct;
+    const gkInGoalLeft = 41 + lateralOffset * 2; // amplify movement
+    document.getElementById('sim-gk').style.left = Math.max(5, Math.min(78, gkInGoalLeft)) + '%';
+  }
+
+  function selectSimZone(zone) {
+    if (state.simInProgress || state.simPaused) return;
+    document.querySelectorAll('#shot-zones .shot-zone').forEach(z => z.classList.remove('selected'));
+    document.querySelector(`#shot-zones .shot-zone[data-zone="${zone}"]`).classList.add('selected');
+    state.simSelectedZone = zone;
+    shoot();
+  }
+
+  function newScenario() {
+    state.simInProgress = false;
+    state.simPaused = false;
+    state.simSelectedZone = null;
+    resetShooterMoveKeys();
+    clearDecisionTimers();
+    updatePauseButton();
+    document.getElementById('outcome-flash').classList.remove('show');
+    document.querySelectorAll('#shot-zones .shot-zone').forEach(z => {
+      z.classList.remove('selected', 'gk-save', 'goal-scored', 'missed');
+    });
+    document.getElementById('gk-behavior-badge').textContent = 'Setting';
+    document.getElementById('sim-gk').className = 'gk-sim';
+
+    // Random shooter starting position (in penalty area-ish)
+    const angle = (Math.random() - 0.5) * 1.0; // -0.5..0.5 rad
+    const dist = 25 + Math.random() * 50;       // 25-75% from goal
+    const sx = 50 + Math.sin(angle) * 25;
+    const sy = Math.max(20, Math.min(90, dist));
+    state.shooterPos = { x: sx, y: sy };
+    document.getElementById('shooter-pitch').style.left = sx + '%';
+    document.getElementById('shooter-pitch').style.top = sy + '%';
+    document.getElementById('shooter-pitch').classList.add('armed');
+    document.getElementById('tap-hint').style.display = 'block';
+
+    // Defender (only in pressure scenario)
+    const defEl = document.getElementById('defender-pitch');
+    if (state.simScenario === 'pressure') {
+      // Defender starts behind/near shooter
+      const dx = sx + (Math.random() - 0.5) * 16;
+      const dy = sy - 8 - Math.random() * 8;
+      state.defenderPos = { x: Math.max(15, Math.min(85, dx)), y: Math.max(10, Math.min(85, dy)) };
+      defEl.style.display = 'block';
+      defEl.style.left = state.defenderPos.x + '%';
+      defEl.style.top = state.defenderPos.y + '%';
+    } else {
+      defEl.style.display = 'none';
+    }
+
+    updateGKPositioning();
+    updateMetrics();
+
+    // Decision window setup
+    const windowMap = { easy: 5500, medium: 4000, hard: 2800 };
+    state.decisionWindowMs = windowMap[state.simDifficulty];
+    startDecisionWindow();
+    updatePauseButton();
+
+    // Dynamic scenario: GK and defender keep moving
+    startScenarioMovement();
+  }
+
+  function triggerHesitationFail() {
+    state.simInProgress = true;
+    state.simPaused = false;
+    resetShooterMoveKeys();
+    clearDecisionTimers();
+    updatePauseButton();
+    document.getElementById('decision-label').textContent = 'Time up — defender closed you down';
+    state.shots.push({
+      mode: 'sim', zone: state.simSelectedZone || 'R4C2', outcome: 'miss',
+      gkPos: Math.round(state.gkPos.x), time: Date.now(),
+      difficulty: state.simDifficulty, scenario: state.simScenario,
+      hesitation: true, xg: state.currentMetrics.xg,
+      distance: state.currentMetrics.distance, angle: state.currentMetrics.angle,
+      reactionMs: state.decisionWindowMs, decisionQuality: 0
+    });
+    updateSimStats();
+    showOutcome({outcome:'miss', zone:state.simSelectedZone||'R4C2',
+      gkAction:'closed-you-down', reactionMs: state.decisionWindowMs,
+      decisionQuality: 0, hesitation: true});
+  }
+
+  function shoot() {
+    if (!state.simSelectedZone || state.simInProgress || state.simPaused) return;
+    state.simInProgress = true;
+    state.simPaused = false;
+    resetShooterMoveKeys();
+    clearDecisionTimers();
+    updatePauseButton();
+
+    const reactionMs = getDecisionElapsed();
+    const reactionFraction = Math.min(1, reactionMs / state.decisionWindowMs);
+    document.getElementById('decision-label').textContent = 'Keeper committed - finish the shot';
+
+    const zone = state.simSelectedZone;
+    const reaction = decideGKReaction(zone);
+
+    // The keeper commits first; the shot is resolved after this cue is visible.
+    const gk = document.getElementById('sim-gk');
+    if (reaction.action) gk.classList.add(reaction.action);
+    document.getElementById('gk-behavior-badge').textContent = reaction.label;
+
+    setTimeout(() => {
+      // Compute outcome after the pre-shot keeper movement.
+      const outcome = computeOutcome(zone, reaction, reactionFraction);
+
+      // Decision quality: was this the correct zone given GK position?
+      const decisionQuality = scoreDecisionQuality(zone, reaction, reactionMs);
+
+      // Animate target zone
+      const zoneEl = document.querySelector(`#shot-zones .shot-zone[data-zone="${zone}"]`);
+      if (outcome === 'goal') zoneEl.classList.add('goal-scored');
+      else if (outcome === 'save') zoneEl.classList.add('gk-save');
+      else zoneEl.classList.add('missed');
+
+      state.shots.push({
+        mode: 'sim', zone, outcome,
+        gkPos: Math.round(state.gkPos.x), time: Date.now(),
+        difficulty: state.simDifficulty, scenario: state.simScenario,
+        xg: state.currentMetrics.xg,
+        distance: state.currentMetrics.distance,
+        angle: state.currentMetrics.angle,
+        reactionMs, decisionQuality
+      });
+      updateSimStats();
+
+      setTimeout(() => showOutcome({
+        outcome, zone, gkAction: reaction.label, reactionMs, decisionQuality,
+        charged: reaction.charged
+      }), 350);
+    }, 450);
+  }
+
+  function decideGKReaction(targetZone) {
+    const diffParams = {
+      easy:    { reactChance: 0.50, accuracy: 0.55, chargeChance: 0.10 },
+      medium:  { reactChance: 0.78, accuracy: 0.78, chargeChance: 0.20 },
+      hard:    { reactChance: 0.92, accuracy: 0.92, chargeChance: 0.30 }
+    };
+    const p = diffParams[state.simDifficulty];
+
+    // GK closer to shooter (within 3m) = more likely to charge & block
+    if (state.currentMetrics.gkDist < 4 && Math.random() < p.chargeChance + 0.3) {
+      return { action: 'charging', label: 'Charging', charged: true };
+    }
+
+    if (Math.random() < p.chargeChance) {
+      return { action: 'charging', label: 'Charging', charged: true };
+    }
+
+    if (Math.random() > p.reactChance) {
+      return { action: '', label: 'Stays' };
+    }
+
+    const correctGuess = Math.random() < p.accuracy;
+    const guessZone = correctGuess
+      ? targetZone
+      : ZONES.filter(z => z !== targetZone)[Math.floor(Math.random() * (ZONES.length - 1))];
+
+    const isLeft = zoneSide(guessZone) === 'L';
+    const isRight = zoneSide(guessZone) === 'R';
+    const action = isLeft ? 'diving-left' : isRight ? 'diving-right' : '';
+    const label = isLeft ? 'Dives Left' : isRight ? 'Dives Right' : 'Stays Center';
+    return { action, label, guessZone };
+  }
+
+  function computeOutcome(zone, reaction, reactionFraction) {
+    // Base miss chance — increases under defender pressure
+    let missChance = state.simDifficulty === 'easy' ? 0.06 :
+                     state.simDifficulty === 'medium' ? 0.10 : 0.14;
+    if (state.simScenario === 'pressure') {
+      const ddx = (state.shooterPos.x - state.defenderPos.x) * PITCH_M_PER_PCT_X;
+      const ddy = (state.shooterPos.y - state.defenderPos.y) * PITCH_M_PER_PCT_Y;
+      const ddDist = Math.sqrt(ddx*ddx + ddy*ddy);
+      if (ddDist < 4) missChance += 0.18;
+    }
+    // Late shots are rushed
+    if (reactionFraction > 0.85) missChance += 0.08;
+    if (Math.random() < missChance) return 'miss';
+
+    // xG-based base success rate (already accounts for distance + angle + GK pressure)
+    const baseGoalProb = state.currentMetrics.xg;
+
+    if (reaction.charged) {
+      // Charging GK closes space dramatically — bottom shots especially hard
+      if (zoneIsBottom(zone)) {
+        return Math.random() < 0.65 ? 'save' : 'goal';
+      } else {
+        // Top corners can still beat charging keeper
+        return Math.random() < 0.30 ? 'save' : 'goal';
+      }
+    }
+
+    if (reaction.guessZone === zone) {
+      // Correct dive — top corners are tough to save even when read
+      if (zoneIsCorner(zone)) {
+        return Math.random() < 0.40 ? 'save' : 'goal';
+      }
+      return Math.random() < 0.78 ? 'save' : 'goal';
+    } else {
+      // Wrong dive or stayed — most goals
+      return Math.random() < (1 - baseGoalProb*1.2) ? 'save' : 'goal';
+    }
+  }
+
+  // Decision quality: did you pick the smartest zone for the GK position?
+  function scoreDecisionQuality(zone, reaction, reactionMs) {
+    if (!reaction.guessZone) return 70; // GK didn't react, anywhere works
+    if (reaction.charged) {
+      // Smart to go top in this case
+      return zoneIsTop(zone) ? 90 : 35;
+    }
+    // GK guessed zone — you needed to go opposite side
+    const oppositeWasSmart = zoneSide(reaction.guessZone) !== zoneSide(zone);
+    if (oppositeWasSmart) return 90;
+    if (reaction.guessZone === zone) return 25; // walked into the dive
+    // Top corner is generally a strong choice
+    if (zoneIsCorner(zone)) return 75;
+    return 55;
+  }
+
+  function showOutcome(o) {
+    const flash = document.getElementById('outcome-flash');
+    const word = document.getElementById('outcome-word');
+    const sub = document.getElementById('outcome-sub');
+    const emoji = document.getElementById('outcome-emoji');
+
+    word.className = 'outcome-word ' + o.outcome;
+
+    if (o.outcome === 'goal') {
+      word.textContent = 'GOAL!';
+      emoji.textContent = '⚽🔥';
+      sub.textContent = `${ZONE_NAMES[o.zone]} — clean finish past ${o.gkAction.toLowerCase()}`;
+    } else if (o.outcome === 'save') {
+      word.textContent = 'Saved';
+      emoji.textContent = '🧤';
+      sub.textContent = o.charged ? 'Keeper closed you down — needed top corner' : `Keeper read it — ${o.gkAction}`;
+    } else {
+      word.textContent = o.hesitation ? 'Time Up' : 'Missed';
+      emoji.textContent = o.hesitation ? '⏱️' : '😬';
+      sub.textContent = o.hesitation ? 'Hesitated too long. Defender closed.' : `Off target — ${ZONE_NAMES[o.zone]}`;
+    }
+
+    document.getElementById('out-xg').textContent = state.currentMetrics.xg.toFixed(2);
+    document.getElementById('out-dist').textContent = state.currentMetrics.distance.toFixed(1) + 'm';
+    document.getElementById('out-react').textContent = (o.reactionMs/1000).toFixed(1) + 's';
+
+    const dq = document.getElementById('decision-quality');
+    dq.className = 'decision-quality';
+    if (o.decisionQuality >= 80) {
+      dq.classList.add('excellent');
+      dq.innerHTML = `✅ <b>Smart decision (${o.decisionQuality}/100)</b><br/><span style="font-weight:500;font-size:11px">You read the GK and picked the right zone.</span>`;
+    } else if (o.decisionQuality >= 50) {
+      dq.classList.add('good');
+      dq.innerHTML = `👍 <b>OK decision (${o.decisionQuality}/100)</b><br/><span style="font-weight:500;font-size:11px">Reasonable choice — but a smarter zone existed.</span>`;
+    } else {
+      dq.classList.add('poor');
+      dq.innerHTML = `⚠️ <b>Poor decision (${o.decisionQuality}/100)</b><br/><span style="font-weight:500;font-size:11px">You shot toward the keeper. Read the dive next time.</span>`;
+    }
+
+    flash.classList.add('show');
+  }
+
+  function updateSimStats() {
+    const simShots = state.shots.filter(s => s.mode === 'sim');
+    const goals = simShots.filter(s => s.outcome === 'goal').length;
+    document.getElementById('sim-goals').textContent = goals;
+    document.getElementById('sim-attempts').textContent = simShots.length;
+    document.getElementById('sim-pct').textContent = simShots.length ? Math.round(goals/simShots.length*100) + '%' : '—';
+
+    const dqShots = simShots.filter(s => typeof s.decisionQuality === 'number');
+    if (dqShots.length) {
+      const avg = dqShots.reduce((sum,s)=>sum+s.decisionQuality, 0) / dqShots.length;
+      document.getElementById('sim-decision-q').textContent = Math.round(avg);
+    }
+  }
+
+  // ============ STATS ============
+  function renderStats() {
+    const shots = state.shots;
+    const total = shots.length;
+    const goals = shots.filter(s => s.outcome === 'goal').length;
+    const saves = shots.filter(s => s.outcome === 'save').length;
+    const misses = shots.filter(s => s.outcome === 'miss').length;
+
+    document.getElementById('stats-session-label').textContent = total ? `${total} shots logged` : 'No shots logged yet';
+    document.getElementById('stat-goals').textContent = goals;
+    document.getElementById('stat-saves').textContent = saves;
+    document.getElementById('stat-misses').textContent = misses;
+    document.getElementById('stat-conversion').textContent = total ? Math.round(goals/total*100) + '%' : '—';
+
+    const dqShots = shots.filter(s => typeof s.decisionQuality === 'number');
+    document.getElementById('stat-decision-pct').textContent = dqShots.length
+      ? Math.round(dqShots.reduce((sum,s)=>sum+s.decisionQuality,0)/dqShots.length) + '/100' : '—';
+
+    const xgShots = shots.filter(s => typeof s.xg === 'number');
+    document.getElementById('stat-avg-xg').textContent = xgShots.length
+      ? (xgShots.reduce((sum,s)=>sum+s.xg,0)/xgShots.length).toFixed(2) : '—';
+
+    // Heatmap
+    const zoneStats = {};
+    ZONES.forEach(z => zoneStats[z] = { shots: 0, goals: 0 });
+    shots.forEach(s => {
+      if (!zoneStats[s.zone]) return;
+      zoneStats[s.zone].shots++;
+      if (s.outcome === 'goal') zoneStats[s.zone].goals++;
+    });
+
+    let bestZone = null, bestPct = -1;
+    document.querySelectorAll('.heatmap-cell').forEach(cell => {
+      const z = cell.dataset.zone;
+      const stat = zoneStats[z];
+      const pctEl = cell.querySelector('.heatmap-pct');
+      const cntEl = cell.querySelector('.heatmap-count');
+      const bgEl = cell.querySelector('.heatmap-cell-bg');
+      if (stat.shots === 0) {
+        pctEl.textContent = '—';
+        cntEl.textContent = '0 shots';
+        bgEl.style.background = 'transparent';
+      } else {
+        const pct = Math.round(stat.goals/stat.shots*100);
+        pctEl.textContent = pct + '%';
+        cntEl.textContent = `${stat.goals}/${stat.shots}`;
+        if (pct >= 70) bgEl.style.background = 'rgba(139,209,110,0.7)';
+        else if (pct >= 50) bgEl.style.background = 'rgba(244,168,0,0.55)';
+        else if (pct >= 30) bgEl.style.background = 'rgba(255,122,46,0.5)';
+        else bgEl.style.background = 'rgba(230,57,70,0.55)';
+        if (pct > bestPct && stat.shots >= 1) { bestPct = pct; bestZone = z; }
+      }
+    });
+    document.getElementById('stat-best-zone').textContent = bestZone ? ZONE_NAMES[bestZone] : '—';
+
+    renderInsights(shots, zoneStats);
+    renderShotLog(shots);
+  }
+
+  function renderInsights(shots, zoneStats) {
+    const box = document.getElementById('insights-box');
+    box.innerHTML = '';
+    if (shots.length < 3) return;
+
+    const totalZonesShot = ZONES.filter(z => zoneStats[z].shots > 0).length;
+    if (totalZonesShot < 4 && shots.length >= 5) {
+      const unused = ZONES.filter(z => zoneStats[z].shots === 0).map(z => ZONE_NAMES[z]);
+      box.innerHTML += `<div class="insight-card"><div class="insight-icon">🎯</div><div class="insight-text"><b>Mix it up.</b> You haven't tried ${unused.slice(0,2).join(' or ')}. Vary your targets to stay unpredictable.</div></div>`;
+    }
+
+    let bestZ = null, bestPct = 0;
+    ZONES.forEach(z => {
+      if (zoneStats[z].shots >= 2) {
+        const pct = zoneStats[z].goals/zoneStats[z].shots*100;
+        if (pct > bestPct) { bestPct = pct; bestZ = z; }
+      }
+    });
+    if (bestZ && bestPct >= 60) {
+      box.innerHTML += `<div class="insight-card"><div class="insight-icon">⚡</div><div class="insight-text"><b>${ZONE_NAMES[bestZ]} is your spot.</b> ${Math.round(bestPct)}% conversion. Lean into this when stakes are high.</div></div>`;
+    }
+
+    // xG outperform / underperform
+    const xgShots = shots.filter(s => typeof s.xg === 'number');
+    if (xgShots.length >= 5) {
+      const totalXg = xgShots.reduce((sum,s)=>sum+s.xg,0);
+      const actualGoals = xgShots.filter(s => s.outcome === 'goal').length;
+      const diff = actualGoals - totalXg;
+      if (Math.abs(diff) >= 1.5) {
+        const verb = diff > 0 ? 'over' : 'under';
+        const emoji = diff > 0 ? '🔥' : '📉';
+        box.innerHTML += `<div class="insight-card"><div class="insight-icon">${emoji}</div><div class="insight-text"><b>${verb}performing xG by ${Math.abs(diff).toFixed(1)}.</b> Expected ${totalXg.toFixed(1)} goals, scored ${actualGoals}.</div></div>`;
+      }
+    }
+
+    // Decision quality
+    const dqShots = shots.filter(s => typeof s.decisionQuality === 'number');
+    if (dqShots.length >= 5) {
+      const avgDq = dqShots.reduce((sum,s)=>sum+s.decisionQuality,0)/dqShots.length;
+      if (avgDq < 50) {
+        box.innerHTML += `<div class="insight-card"><div class="insight-icon">🧠</div><div class="insight-text"><b>Read the GK better.</b> Avg decision score ${Math.round(avgDq)}/100 — you're shooting toward the keeper too often.</div></div>`;
+      } else if (avgDq >= 75) {
+        box.innerHTML += `<div class="insight-card"><div class="insight-icon">🧠</div><div class="insight-text"><b>Sharp reading.</b> Avg decision score ${Math.round(avgDq)}/100. Now work on conversion under that decision quality.</div></div>`;
+      }
+    }
+  }
+
+  function renderShotLog(shots) {
+    const log = document.getElementById('shot-log');
+    if (shots.length === 0) {
+      log.innerHTML = '<div class="log-empty">No shots yet — go score some.</div>';
+      return;
+    }
+    const recent = [...shots].reverse().slice(0, 12);
+    log.innerHTML = recent.map(s => {
+      const meta = [];
+      if (s.distance) meta.push(`${s.distance.toFixed(1)}m`);
+      if (s.angle) meta.push(`${s.angle.toFixed(0)}°`);
+      if (s.xg) meta.push(`xG ${s.xg.toFixed(2)}`);
+      if (s.decisionQuality !== undefined) meta.push(`Dec ${s.decisionQuality}`);
+      return `
+      <div class="log-entry">
+        <div class="log-outcome-dot ${s.outcome}"></div>
+        <div class="log-entry-info">
+          <div class="log-entry-title">${s.outcome} — ${ZONE_NAMES[s.zone]}</div>
+          <div class="log-entry-meta">${meta.join(' · ') || 'no metadata'}</div>
+        </div>
+        <div class="log-entry-mode ${s.mode}">${s.mode}</div>
+      </div>
+    `}).join('');
+  }
+
+  function clearStats() {
+    if (confirm('Clear all shots from this session?')) {
+      state.shots = [];
+      updateARStats();
+      updateSimStats();
+      renderStats();
+    }
+  }
+
+  document.addEventListener('keydown', event => handleShooterKey(event, true));
+  document.addEventListener('keyup', event => handleShooterKey(event, false));
+  window.addEventListener('blur', resetShooterMoveKeys);
+</script>
+</body>
+</html>
