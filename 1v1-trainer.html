@@ -498,7 +498,7 @@
   }
   .diff-btn.active { background: var(--orange); color: white; }
 
-  /* Tactical pitch view */
+  /* Unified match view */
   .pitch-view-container {
     position: relative; z-index: 4;
     width: 100%;
@@ -507,114 +507,348 @@
   }
   .pitch-tactical {
     width: 100%;
-    aspect-ratio: 2/1.4;
-    max-height: 38vh;
+    aspect-ratio: 16/10;
+    min-height: 330px;
+    max-height: 50vh;
     background:
-      radial-gradient(ellipse at 50% 0%, rgba(80,150,60,0.3) 0%, rgba(46,108,32,0.5) 100%);
+      linear-gradient(to bottom, rgba(18,38,48,0.96) 0%, rgba(24,50,57,0.94) 18%, rgba(64,123,54,0.82) 42%, rgba(27,91,36,0.98) 100%);
     border: 3px solid var(--ink);
     border-radius: 14px;
     position: relative;
     overflow: hidden;
     box-shadow: 3px 3px 0 var(--ink);
+    isolation: isolate;
   }
-  /* mowed lines */
   .pitch-tactical::before {
     content: ''; position: absolute; inset: 0;
-    background: repeating-linear-gradient(to bottom,
-      transparent 0%, transparent 10%,
-      rgba(46,108,32,0.3) 10%, rgba(46,108,32,0.3) 20%);
+    background:
+      radial-gradient(ellipse at 50% 112%, rgba(214,244,199,0.18) 0%, transparent 50%),
+      repeating-linear-gradient(82deg, transparent 0 10%, rgba(255,255,255,0.04) 10% 10.6%, transparent 10.6% 20%);
+    pointer-events: none;
+    z-index: 0;
   }
-  /* penalty box */
-  .pen-box {
+  .pitch-tactical::after {
+    content: ''; position: absolute;
+    left: -8%; right: -8%; bottom: -14%; height: 64%;
+    background:
+      linear-gradient(78deg, transparent 0 47%, rgba(255,255,255,0.45) 47.5% 48.3%, transparent 48.7% 100%),
+      linear-gradient(-78deg, transparent 0 47%, rgba(255,255,255,0.45) 47.5% 48.3%, transparent 48.7% 100%),
+      repeating-linear-gradient(to bottom, rgba(58,130,45,0.15) 0 14%, rgba(22,82,34,0.18) 14% 28%);
+    clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .stadium-ribbon {
+    position: absolute; left: -4%; right: -4%; top: 18%;
+    height: 12%;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.75) 0 26px, rgba(184,64,224,0.95) 26px 88px),
+      linear-gradient(90deg, #7e2ad4, #c24feb);
+    border-top: 2px solid rgba(255,255,255,0.2);
+    border-bottom: 2px solid rgba(0,0,0,0.45);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    z-index: 1;
+    transform: rotate(-1deg);
+  }
+  .stadium-crowd {
+    position: absolute; left: 0; right: 0; top: 0; height: 32%;
+    background:
+      radial-gradient(circle at 18% 45%, rgba(255,255,255,0.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 54% 48%, rgba(100,190,235,0.6) 0 1px, transparent 2px),
+      radial-gradient(circle at 78% 38%, rgba(255,122,46,0.55) 0 1px, transparent 2px),
+      linear-gradient(to bottom, rgba(8,20,28,0.88), rgba(22,42,48,0.64));
+    background-size: 26px 18px, 31px 20px, 37px 22px, auto;
+    z-index: 0;
+  }
+  .match-goal-frame {
     position: absolute;
-    top: 0;
-    left: 50%; transform: translateX(-50%);
-    width: 60%; height: 40%;
-    border: 2px solid var(--chalk);
-    border-top: none;
+    top: 28%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(64%, 360px);
+    aspect-ratio: 3/1.25;
+    z-index: 4;
+    perspective: 600px;
+  }
+  .goal-3d {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border: 5px solid var(--chalk);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: radial-gradient(ellipse at 50% 54%, rgba(245,250,250,0.08) 0%, rgba(20,50,35,0.48) 100%);
+    box-shadow: 0 0 22px rgba(255,255,255,0.35), inset 0 0 55px rgba(0,0,0,0.42);
+    overflow: hidden;
+  }
+  .goal-3d::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px);
+    background-size: 13px 10px;
     pointer-events: none;
   }
-  .pen-arc {
+  .goal-3d::after {
+    content: '';
     position: absolute;
-    top: 40%; left: 50%; transform: translateX(-50%);
-    width: 25%; aspect-ratio: 2/1;
-    border: 2px solid var(--chalk);
-    border-top: none;
-    border-radius: 0 0 100% 100%;
-    pointer-events: none;
-  }
-  .six-yard {
-    position: absolute;
-    top: 0;
-    left: 50%; transform: translateX(-50%);
-    width: 30%; height: 18%;
-    border: 2px solid var(--chalk);
-    border-top: none;
-    pointer-events: none;
-  }
-  .pen-spot {
-    position: absolute;
-    top: 28%; left: 50%; transform: translate(-50%, -50%);
-    width: 6px; height: 6px;
-    background: var(--chalk); border-radius: 50%;
-  }
-  /* goal */
-  .goal-line {
-    position: absolute;
-    top: 0; left: 50%; transform: translateX(-50%);
-    width: 14%; height: 4px;
+    bottom: -3px; left: -3px; right: -3px; height: 5px;
     background: var(--chalk);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
-
-  /* GK on pitch */
+  .goal-shadow {
+    position: absolute;
+    left: 50%; top: 70%;
+    transform: translateX(-50%);
+    width: min(76%, 410px); height: 11px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.45) 20%, transparent 70%);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .shot-zones {
+    position: absolute; inset: 0;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr); z-index: 4;
+  }
+  .shot-zone {
+    border: 1px dashed rgba(255,255,255,0.1);
+    cursor: crosshair; position: relative;
+    transition: background 0.15s, border-color 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .shot-zone::after {
+    content: attr(data-label);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.35); text-transform: uppercase;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .shot-zone:hover::after { opacity: 1; }
+  .shot-zone.selected {
+    background: rgba(255,224,102,0.35);
+    border: 2px solid var(--sun);
+    box-shadow: inset 0 0 20px rgba(255,224,102,0.4);
+  }
+  .shot-zone.selected::after { opacity: 1; color: var(--sun); }
+  .shot-zone.gk-save {
+    background: rgba(244,168,0,0.45) !important;
+    border-color: var(--amber) !important;
+  }
+  .shot-zone.goal-scored {
+    background: rgba(139,209,110,0.5) !important;
+    border-color: var(--grass-light) !important;
+  }
+  .shot-zone.missed {
+    background: rgba(230,57,70,0.35) !important;
+    border-color: var(--red) !important;
+  }
   .gk-pitch {
     position: absolute;
-    width: 14px; height: 14px;
-    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
-    border: 2px solid var(--ink);
+    width: 34px; height: 10px;
+    background: rgba(0,0,0,0.32);
+    border: none;
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: top 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), left 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .gk-pitch::after { display: none; }
+  .gk-sim {
+    position: absolute; bottom: -5%; z-index: 5;
+    width: 22%; height: 86%;
+    background: none;
+    border: none;
+    --keeper-shirt: #DDE8E0;
+    --keeper-shirt-shadow: #A8B7AE;
+    --keeper-shorts: #121923;
+    --keeper-skin: #C88965;
+    --keeper-glove: #DDF65F;
+    --keeper-boot: #F5F7F0;
+    transform-origin: 50% 82%;
+    transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                bottom 0.4s ease, opacity 0.3s;
+    pointer-events: none;
+    filter: drop-shadow(0 8px 7px rgba(0,0,0,0.35));
+  }
+  .gk-sim::before {
+    content: '';
+    position: absolute; bottom: 1%; left: 50%;
+    transform: translateX(-50%);
+    width: 78%; height: 9%;
+    background: rgba(0,0,0,0.26);
+    border-radius: 50%;
+    z-index: -1;
+  }
+  .gk-head {
+    position: absolute; top: 2%; left: 50%;
+    width: 24%; aspect-ratio: 0.86/1;
+    transform: translateX(-50%);
+    background:
+      radial-gradient(circle at 34% 42%, rgba(20,25,25,0.75) 0 4%, transparent 5%),
+      radial-gradient(circle at 66% 42%, rgba(20,25,25,0.75) 0 4%, transparent 5%),
+      linear-gradient(to bottom, #2B2723 0 18%, var(--keeper-skin) 19%);
+    border: 2px solid var(--ink);
+    border-radius: 45% 45% 42% 42%;
+    z-index: 7;
+  }
+  .gk-neck {
+    position: absolute; top: 20%; left: 50%;
+    width: 12%; height: 8%;
+    transform: translateX(-50%);
+    background: var(--keeper-skin);
+    border: 2px solid var(--ink);
+    border-radius: 0 0 8px 8px;
+    z-index: 4;
+  }
+  .gk-torso {
+    position: absolute; top: 24%; left: 50%;
+    width: 48%; height: 30%;
+    transform: translateX(-50%);
+    background:
+      linear-gradient(115deg, rgba(255,255,255,0.65) 0 18%, transparent 19%),
+      linear-gradient(to bottom, var(--keeper-shirt), var(--keeper-shirt-shadow));
+    border: 2px solid var(--ink);
+    border-radius: 28% 28% 14% 14%;
     z-index: 5;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
-  .gk-pitch::after {
-    content: 'GK';
-    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 8px; font-weight: 800; color: var(--orange);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  .gk-torso::after {
+    content: '';
+    position: absolute; left: 22%; right: 22%; top: 42%;
+    height: 10%;
+    background: rgba(18,25,35,0.2);
+    border-radius: 999px;
   }
-  /* shooter */
+  .gk-arm,
+  .gk-leg {
+    position: absolute;
+    border: 2px solid var(--ink);
+    transform-origin: top center;
+  }
+  .gk-arm {
+    top: 29%;
+    width: 11%; height: 45%;
+    background: linear-gradient(to bottom, var(--keeper-shirt), var(--keeper-shirt-shadow));
+    border-radius: 999px;
+    z-index: 4;
+  }
+  .gk-arm-left { left: 16%; transform: rotate(19deg); }
+  .gk-arm-right { right: 16%; transform: rotate(-19deg); }
+  .gk-glove {
+    position: absolute; bottom: -14%; left: 50%;
+    width: 150%; height: 26%;
+    transform: translateX(-50%);
+    background: var(--keeper-glove);
+    border: 2px solid var(--ink);
+    border-radius: 45% 45% 35% 35%;
+  }
+  .gk-leg {
+    top: 52%;
+    width: 13%; height: 43%;
+    background: var(--keeper-shorts);
+    border-radius: 999px;
+    z-index: 3;
+  }
+  .gk-leg-left { left: 34%; transform: rotate(15deg); }
+  .gk-leg-right { right: 34%; transform: rotate(-15deg); }
+  .gk-boot {
+    position: absolute; bottom: -10%; left: 50%;
+    width: 160%; height: 18%;
+    transform: translateX(-50%);
+    background: var(--keeper-boot);
+    border: 2px solid var(--ink);
+    border-radius: 999px 999px 55% 55%;
+  }
+  .gk-sim.diving-left {
+    transform: rotate(-62deg) translateX(-48%) translateY(-2%);
+  }
+  .gk-sim.diving-right {
+    transform: rotate(62deg) translateX(48%) translateY(-2%);
+  }
+  .gk-sim.diving-left .gk-arm-left {
+    left: 2%; transform: rotate(82deg); height: 52%;
+  }
+  .gk-sim.diving-left .gk-arm-right {
+    right: 22%; transform: rotate(-34deg); height: 38%;
+  }
+  .gk-sim.diving-left .gk-leg-left { left: 26%; transform: rotate(47deg); }
+  .gk-sim.diving-left .gk-leg-right { right: 22%; transform: rotate(-26deg); }
+  .gk-sim.diving-right .gk-arm-right {
+    right: 2%; transform: rotate(-82deg); height: 52%;
+  }
+  .gk-sim.diving-right .gk-arm-left {
+    left: 22%; transform: rotate(34deg); height: 38%;
+  }
+  .gk-sim.diving-right .gk-leg-right { right: 26%; transform: rotate(-47deg); }
+  .gk-sim.diving-right .gk-leg-left { left: 22%; transform: rotate(26deg); }
+  .gk-sim.diving-left .gk-glove,
+  .gk-sim.diving-right .gk-glove {
+    height: 30%;
+  }
+  .gk-sim.charging {
+    transform: scale(1.23) translateY(8%);
+    bottom: 2%;
+  }
+  .gk-sim.charging .gk-head { top: 4%; }
+  .gk-sim.charging .gk-torso {
+    top: 27%; height: 27%;
+    transform: translateX(-50%) scaleX(1.08);
+  }
+  .gk-sim.charging .gk-arm-left { left: 7%; transform: rotate(36deg); height: 47%; }
+  .gk-sim.charging .gk-arm-right { right: 7%; transform: rotate(-36deg); height: 47%; }
+  .gk-sim.charging .gk-leg-left { left: 25%; transform: rotate(24deg); height: 39%; }
+  .gk-sim.charging .gk-leg-right { right: 25%; transform: rotate(-24deg); height: 39%; }
+  .gk-sim.charging .gk-glove {
+    background: #EEFF7A;
+  }
   .shooter-pitch {
     position: absolute;
-    width: 16px; height: 16px;
-    background: var(--paper);
+    width: 40px; height: 64px;
+    background: linear-gradient(to bottom, #8fd7ff 0 42%, var(--paper) 42% 67%, #8fd7ff 67%);
     border: 2px solid var(--ink);
-    border-radius: 50%;
+    border-radius: 45% 45% 18% 18%;
     transform: translate(-50%, -50%);
     transition: top 0.5s ease, left 0.5s ease;
-    z-index: 5;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 6;
+    box-shadow: 0 12px 16px rgba(0,0,0,0.35);
     cursor: pointer;
+  }
+  .shooter-pitch::before {
+    content: '';
+    position: absolute; top: -17px; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 20px;
+    background: #f0c29a;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
   }
   .shooter-pitch::after {
     content: 'YOU';
-    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: -17px; left: 50%; transform: translateX(-50%);
     font-family: 'Bricolage Grotesque', sans-serif;
     font-size: 8px; font-weight: 800; color: var(--paper);
     text-shadow: 0 1px 2px rgba(0,0,0,0.7);
     white-space: nowrap;
   }
-  .shooter-pitch.armed { background: var(--orange); }
-  /* defender */
-  .defender-pitch {
+  .shooter-pitch.armed { outline: 3px solid var(--orange); }
+  .match-ball {
     position: absolute;
-    width: 12px; height: 12px;
-    background: #444;
+    width: 18px; height: 18px;
+    background:
+      radial-gradient(circle at 34% 30%, white 0 31%, transparent 32%),
+      radial-gradient(circle at 50% 50%, #f8f8f8 0 60%, #d7d7d7 61%);
     border: 2px solid var(--ink);
     border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 7;
+    box-shadow: 0 8px 12px rgba(0,0,0,0.32);
+    pointer-events: none;
+  }
+  .defender-pitch {
+    position: absolute;
+    width: 28px; height: 44px;
+    background: linear-gradient(to bottom, #31363c 0 55%, #181b1f 55%);
+    border: 2px solid var(--ink);
+    border-radius: 45% 45% 16% 16%;
     transform: translate(-50%, -50%);
     transition: top 0.6s ease, left 0.6s ease;
     z-index: 4;
@@ -627,10 +861,8 @@
     font-size: 8px; font-weight: 800; color: #ddd;
     text-shadow: 0 1px 2px rgba(0,0,0,0.7);
   }
-
-  /* tap-to-place hint */
   .tap-hint {
-    position: absolute; top: 12px; right: 12px;
+    position: absolute; bottom: 12px; right: 12px;
     background: var(--paper);
     border: 2px solid var(--ink);
     border-radius: 8px;
@@ -639,10 +871,8 @@
     font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
     color: var(--ink);
     box-shadow: 1px 1px 0 var(--ink);
-    z-index: 6;
+    z-index: 8;
   }
-
-  /* angle line visualization */
   .angle-svg {
     position: absolute; inset: 0;
     pointer-events: none;
@@ -680,119 +910,6 @@
     font-family: 'Bricolage Grotesque', sans-serif;
     font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
     color: var(--ink-soft); text-transform: uppercase; margin-top: 2px;
-  }
-
-  /* Goal & zones */
-  .goal-3d-container {
-    position: relative; z-index: 3;
-    width: min(96vw, 460px);
-    margin: 6px auto 0;
-  }
-  .goal-3d {
-    width: 100%; aspect-ratio: 3/1.5;
-    position: relative;
-    border: 4px solid var(--chalk); border-bottom: none;
-    border-radius: 4px 4px 0 0;
-    background: radial-gradient(ellipse at 50% 50%, rgba(40,80,30,0.4) 0%, rgba(20,50,15,0.7) 100%);
-    box-shadow: 0 0 30px rgba(255,255,255,0.3), inset 0 0 60px rgba(0,0,0,0.4);
-    overflow: hidden;
-  }
-  .goal-3d::before {
-    content: ''; position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
-    background-size: 14px 10px;
-  }
-  .goal-3d::after {
-    content: '';
-    position: absolute;
-    bottom: -3px; left: -2px; right: -2px; height: 4px;
-    background: var(--chalk);
-  }
-  .goal-shadow {
-    width: min(96vw, 460px); height: 10px;
-    background: radial-gradient(ellipse at center, var(--shadow-grass) 30%, transparent 70%);
-    margin: 4px auto 0;
-    position: relative; z-index: 2;
-  }
-  .shot-zones {
-    position: absolute; inset: 0;
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr); z-index: 4;
-  }
-  .shot-zone {
-    border: 1px dashed rgba(255,255,255,0.1);
-    cursor: pointer; position: relative;
-    transition: background 0.15s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .shot-zone::after {
-    content: attr(data-label);
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 8px; font-weight: 700; letter-spacing: 0.4px;
-    color: rgba(255,255,255,0.3); text-transform: uppercase;
-    opacity: 0; transition: opacity 0.15s;
-  }
-  .shot-zone:hover::after { opacity: 1; }
-  .shot-zone.selected {
-    background: rgba(255,224,102,0.35);
-    border: 2px solid var(--sun);
-    box-shadow: inset 0 0 20px rgba(255,224,102,0.4);
-  }
-  .shot-zone.selected::after { opacity: 1; color: var(--sun); }
-  .shot-zone.gk-save {
-    background: rgba(244,168,0,0.45) !important;
-    border-color: var(--amber) !important;
-  }
-  .shot-zone.goal-scored {
-    background: rgba(139,209,110,0.5) !important;
-    border-color: var(--grass-light) !important;
-  }
-  .shot-zone.missed {
-    background: rgba(230,57,70,0.35) !important;
-    border-color: var(--red) !important;
-  }
-
-  /* GK in goal */
-  .gk-sim {
-    position: absolute; bottom: 0; z-index: 5;
-    width: 18%; aspect-ratio: 0.45/1;
-    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
-    border-radius: 40% 40% 0 0;
-    border: 2px solid var(--ink);
-    transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                bottom 0.4s ease, opacity 0.3s;
-    pointer-events: none;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
-  }
-  .gk-sim::before {
-    content: '';
-    position: absolute; top: -22%; left: 50%;
-    transform: translateX(-50%);
-    width: 50%; aspect-ratio: 1;
-    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
-    border-radius: 50%;
-    border: 2px solid var(--ink);
-  }
-  .gk-sim::after {
-    content: '';
-    position: absolute; top: 18%; left: -36%;
-    width: 172%; height: 22%;
-    background: linear-gradient(135deg, #FFD93D, #FF9A2E);
-    border-radius: 6px;
-    border: 2px solid var(--ink);
-  }
-  .gk-sim.diving-left {
-    transform: rotate(-50deg) translateX(-40%) translateY(-10%);
-  }
-  .gk-sim.diving-right {
-    transform: rotate(50deg) translateX(40%) translateY(-10%);
-  }
-  .gk-sim.charging {
-    transform: scale(1.15) translateY(8%);
-    bottom: 8%;
   }
 
   /* GK behavior badge */
@@ -882,15 +999,17 @@
   .outcome-flash.show { opacity: 1; pointer-events: all; }
   .outcome-card {
     background: var(--paper); border: 3px solid var(--ink); border-radius: 18px;
-    padding: 22px 26px;
+    padding: 18px 26px;
     box-shadow: 6px 6px 0 var(--ink);
     text-align: center; max-width: 320px; width: 100%;
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
     animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .outcome-emoji { font-size: 44px; margin-bottom: 0; }
   .outcome-word {
     font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -1px;
+    font-size: 34px; font-weight: 800; line-height: 1; letter-spacing: -1px;
     text-transform: uppercase;
   }
   .outcome-word.goal { color: var(--grass-dark); }
@@ -902,7 +1021,7 @@
     margin-top: 4px; line-height: 1.4;
   }
   .outcome-stats {
-    display: flex; gap: 6px; margin-top: 14px;
+    display: flex; gap: 6px; margin-top: 10px;
     justify-content: center;
   }
   .outcome-mini-stat {
@@ -924,8 +1043,8 @@
     margin-top: 2px;
   }
   .decision-quality {
-    margin-top: 14px;
-    padding: 8px 12px;
+    margin-top: 10px;
+    padding: 7px 12px;
     border-radius: 10px;
     font-family: 'Bricolage Grotesque', sans-serif;
     font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
@@ -935,8 +1054,27 @@
   .decision-quality.excellent { background: var(--grass-light); }
   .decision-quality.good { background: var(--sun); }
   .decision-quality.poor { background: rgba(255,122,46,0.3); }
+  .decision-feedback {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    background: var(--sky-low);
+    text-align: left;
+    font-family: 'Inter Tight', sans-serif;
+    color: var(--ink);
+  }
+  .decision-feedback-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+  .decision-feedback-line {
+    font-size: 10.5px; line-height: 1.2; font-weight: 600;
+  }
+  .decision-feedback-line + .decision-feedback-line { margin-top: 4px; }
   .outcome-next-btn {
-    margin-top: 14px; padding: 10px 24px;
+    margin-top: 10px; padding: 10px 24px;
     font-family: 'Bricolage Grotesque', sans-serif;
     font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
     background: var(--ink); color: var(--paper);
@@ -1347,8 +1485,8 @@
 
   <div class="sim-header">
     <div class="sim-title-block">
-      <div class="sim-title">Tactical Sim</div>
-      <div class="sim-subtitle" id="sim-subtitle">Tap pitch to position</div>
+      <div class="sim-title">Match View</div>
+      <div class="sim-subtitle" id="sim-subtitle">Field position + finish</div>
     </div>
     <div class="sim-stats-pill">
       <div class="sim-stat"><div class="sim-stat-val green" id="sim-goals">0</div><div class="sim-stat-lbl">G</div></div>
@@ -1365,18 +1503,49 @@
     <button class="diff-btn" id="diff-hard" onclick="setDifficulty('hard')">World Class</button>
   </div>
 
-  <!-- Tactical pitch (overhead view) -->
+  <!-- Unified player and goalkeeper view -->
   <div class="pitch-view-container">
     <div class="pitch-tactical" id="pitch-tactical" onclick="placeShooter(event)">
-      <div class="pen-box"></div>
-      <div class="pen-arc"></div>
-      <div class="six-yard"></div>
-      <div class="goal-line"></div>
-      <div class="pen-spot"></div>
+      <div class="stadium-crowd"></div>
+      <div class="stadium-ribbon"></div>
+      <div class="match-goal-frame">
+        <div class="goal-3d" id="sim-goal">
+          <div class="gk-behavior" id="gk-behavior-badge">Setting</div>
+          <div class="shot-zones" id="shot-zones" onclick="handleShotZoneTap(event)">
+            <div class="shot-zone" data-zone="R1C1" data-label="High L" onclick="selectSimZone('R1C1')"></div>
+            <div class="shot-zone" data-zone="R1C2" data-label="High ML" onclick="selectSimZone('R1C2')"></div>
+            <div class="shot-zone" data-zone="R1C3" data-label="High MR" onclick="selectSimZone('R1C3')"></div>
+            <div class="shot-zone" data-zone="R1C4" data-label="High R" onclick="selectSimZone('R1C4')"></div>
+            <div class="shot-zone" data-zone="R2C1" data-label="Mid L" onclick="selectSimZone('R2C1')"></div>
+            <div class="shot-zone" data-zone="R2C2" data-label="Mid ML" onclick="selectSimZone('R2C2')"></div>
+            <div class="shot-zone" data-zone="R2C3" data-label="Mid MR" onclick="selectSimZone('R2C3')"></div>
+            <div class="shot-zone" data-zone="R2C4" data-label="Mid R" onclick="selectSimZone('R2C4')"></div>
+            <div class="shot-zone" data-zone="R3C1" data-label="Low L" onclick="selectSimZone('R3C1')"></div>
+            <div class="shot-zone" data-zone="R3C2" data-label="Low ML" onclick="selectSimZone('R3C2')"></div>
+            <div class="shot-zone" data-zone="R3C3" data-label="Low MR" onclick="selectSimZone('R3C3')"></div>
+            <div class="shot-zone" data-zone="R3C4" data-label="Low R" onclick="selectSimZone('R3C4')"></div>
+            <div class="shot-zone" data-zone="R4C1" data-label="Floor L" onclick="selectSimZone('R4C1')"></div>
+            <div class="shot-zone" data-zone="R4C2" data-label="Floor ML" onclick="selectSimZone('R4C2')"></div>
+            <div class="shot-zone" data-zone="R4C3" data-label="Floor MR" onclick="selectSimZone('R4C3')"></div>
+            <div class="shot-zone" data-zone="R4C4" data-label="Floor R" onclick="selectSimZone('R4C4')"></div>
+          </div>
+          <div class="gk-sim" id="sim-gk" style="left:39%">
+            <span class="gk-head"></span>
+            <span class="gk-neck"></span>
+            <span class="gk-torso"></span>
+            <span class="gk-arm gk-arm-left"><span class="gk-glove"></span></span>
+            <span class="gk-arm gk-arm-right"><span class="gk-glove"></span></span>
+            <span class="gk-leg gk-leg-left"><span class="gk-boot"></span></span>
+            <span class="gk-leg gk-leg-right"><span class="gk-boot"></span></span>
+          </div>
+        </div>
+      </div>
+      <div class="goal-shadow"></div>
       <svg class="angle-svg" id="angle-svg" viewBox="0 0 200 140" preserveAspectRatio="none"></svg>
-      <div class="gk-pitch" id="gk-pitch" style="top:7%;left:50%"></div>
-      <div class="defender-pitch" id="defender-pitch" style="top:30%;left:50%;display:none"></div>
-      <div class="shooter-pitch" id="shooter-pitch" style="top:55%;left:50%"></div>
+      <div class="gk-pitch" id="gk-pitch" style="top:46%;left:50%"></div>
+      <div class="defender-pitch" id="defender-pitch" style="top:62%;left:50%;display:none"></div>
+      <div class="shooter-pitch" id="shooter-pitch" style="top:78%;left:38%"></div>
+      <div class="match-ball" id="match-ball" style="top:82%;left:42%"></div>
       <div class="tap-hint" id="tap-hint">Tap to move</div>
     </div>
   </div>
@@ -1399,33 +1568,6 @@
       <div class="metric-val" id="metric-gkdist">—</div>
       <div class="metric-lbl">GK m</div>
     </div>
-  </div>
-
-  <!-- Goal with zones -->
-  <div class="goal-3d-container">
-    <div class="goal-3d" id="sim-goal">
-      <div class="gk-behavior" id="gk-behavior-badge">Setting</div>
-      <div class="shot-zones" id="shot-zones">
-        <div class="shot-zone" data-zone="R1C1" data-label="High L" onclick="selectSimZone('R1C1')"></div>
-        <div class="shot-zone" data-zone="R1C2" data-label="High ML" onclick="selectSimZone('R1C2')"></div>
-        <div class="shot-zone" data-zone="R1C3" data-label="High MR" onclick="selectSimZone('R1C3')"></div>
-        <div class="shot-zone" data-zone="R1C4" data-label="High R" onclick="selectSimZone('R1C4')"></div>
-        <div class="shot-zone" data-zone="R2C1" data-label="Mid L" onclick="selectSimZone('R2C1')"></div>
-        <div class="shot-zone" data-zone="R2C2" data-label="Mid ML" onclick="selectSimZone('R2C2')"></div>
-        <div class="shot-zone" data-zone="R2C3" data-label="Mid MR" onclick="selectSimZone('R2C3')"></div>
-        <div class="shot-zone" data-zone="R2C4" data-label="Mid R" onclick="selectSimZone('R2C4')"></div>
-        <div class="shot-zone" data-zone="R3C1" data-label="Low L" onclick="selectSimZone('R3C1')"></div>
-        <div class="shot-zone" data-zone="R3C2" data-label="Low ML" onclick="selectSimZone('R3C2')"></div>
-        <div class="shot-zone" data-zone="R3C3" data-label="Low MR" onclick="selectSimZone('R3C3')"></div>
-        <div class="shot-zone" data-zone="R3C4" data-label="Low R" onclick="selectSimZone('R3C4')"></div>
-        <div class="shot-zone" data-zone="R4C1" data-label="Floor L" onclick="selectSimZone('R4C1')"></div>
-        <div class="shot-zone" data-zone="R4C2" data-label="Floor ML" onclick="selectSimZone('R4C2')"></div>
-        <div class="shot-zone" data-zone="R4C3" data-label="Floor MR" onclick="selectSimZone('R4C3')"></div>
-        <div class="shot-zone" data-zone="R4C4" data-label="Floor R" onclick="selectSimZone('R4C4')"></div>
-      </div>
-      <div class="gk-sim" id="sim-gk" style="left:41%"></div>
-    </div>
-    <div class="goal-shadow"></div>
   </div>
 
   <!-- Decision timer -->
@@ -1466,6 +1608,7 @@
         </div>
       </div>
       <div class="decision-quality" id="decision-quality"></div>
+      <div class="decision-feedback" id="decision-feedback"></div>
       <button class="outcome-next-btn" onclick="newScenario()">Next Scenario →</button>
     </div>
   </div>
@@ -1640,9 +1783,9 @@
     arGKDragReady: false,
     cameraStream: null,
     // Sim — tactical
-    shooterPos: { x: 50, y: 55 }, // % on pitch
+    shooterPos: { x: 38, y: 78 }, // % on pitch
     gkPos:      { x: 50, y: 7 },  // % on pitch
-    defenderPos: { x: 50, y: 30 },
+    defenderPos: { x: 50, y: 62 },
     simSelectedZone: null,
     simDifficulty: 'easy',
     simScenario: 'static',
@@ -1699,6 +1842,17 @@
     const col = zoneCol(zone);
     if (col <= 2) return 'L';
     return 'R';
+  }
+
+  function oppositeZone(zone) {
+    const row = zoneRow(zone);
+    const col = zoneCol(zone);
+    const oppositeCol = col <= 2 ? 4 : 1;
+    return `R${row}C${oppositeCol}`;
+  }
+
+  function highCornerAwayFromKeeper() {
+    return state.gkPos.x >= 50 ? 'R1C1' : 'R1C4';
   }
 
   // Pitch coordinate constants — modeling vertical half-pitch
@@ -1913,7 +2067,7 @@
                      state.simDifficulty === 'medium' ? 0.8 : 0.4;
       state.gkPos.x += (Math.random() - 0.5) * jitter * 2;
       state.gkPos.x = Math.max(35, Math.min(65, state.gkPos.x));
-      document.getElementById('gk-pitch').style.left = state.gkPos.x + '%';
+      updateKeeperDepthVisual();
       renderAngleSVG();
 
       // Defender closes in pressure mode
@@ -1932,7 +2086,7 @@
       if (tickCount > 8 && Math.random() < 0.04) {
         const t = 0.55;
         state.gkPos.y = Math.min(state.shooterPos.y - 5, state.gkPos.y + (state.shooterPos.y - state.gkPos.y) * t);
-        document.getElementById('gk-pitch').style.top = state.gkPos.y + '%';
+        updateKeeperDepthVisual();
         document.getElementById('gk-behavior-badge').textContent = 'Charging!';
       }
 
@@ -1967,11 +2121,27 @@
     const constrainedX = Math.max(8, Math.min(92, x));
     const constrainedY = Math.max(20, Math.min(90, y));
     state.shooterPos = { x: constrainedX, y: constrainedY };
-    document.getElementById('shooter-pitch').style.left = constrainedX + '%';
-    document.getElementById('shooter-pitch').style.top = constrainedY + '%';
+    updateShooterVisual();
     document.getElementById('tap-hint').style.display = 'none';
     updateGKPositioning();
     updateMetrics();
+  }
+
+  function updateShooterVisual() {
+    const shooter = document.getElementById('shooter-pitch');
+    const ball = document.getElementById('match-ball');
+    if (!shooter || !ball) return;
+    shooter.style.left = state.shooterPos.x + '%';
+    shooter.style.top = state.shooterPos.y + '%';
+    ball.style.left = Math.min(94, state.shooterPos.x + 4) + '%';
+    ball.style.top = Math.min(92, state.shooterPos.y + 4) + '%';
+  }
+
+  function updateKeeperDepthVisual() {
+    const keeperCue = document.getElementById('gk-pitch');
+    if (!keeperCue) return;
+    keeperCue.style.left = state.gkPos.x + '%';
+    keeperCue.style.top = Math.max(42, Math.min(58, 41 + state.gkPos.y * 0.75)) + '%';
   }
 
   function resetShooterMoveKeys() {
@@ -2037,6 +2207,16 @@
   // Place shooter on pitch via tap
   function placeShooter(event) {
     if (state.simInProgress || state.simPaused) return;
+    const goal = document.getElementById('sim-goal');
+    if (goal) {
+      const goalRect = goal.getBoundingClientRect();
+      const insideGoal = event.clientX >= goalRect.left && event.clientX <= goalRect.right &&
+                         event.clientY >= goalRect.top && event.clientY <= goalRect.bottom;
+      if (insideGoal) {
+        selectZoneFromGoalPoint(event.clientX, event.clientY, goalRect);
+        return;
+      }
+    }
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
@@ -2073,8 +2253,7 @@
     const gkY = idealDepthPct;
 
     state.gkPos = { x: Math.max(35, Math.min(65, gkX)), y: gkY };
-    document.getElementById('gk-pitch').style.left = state.gkPos.x + '%';
-    document.getElementById('gk-pitch').style.top = state.gkPos.y + '%';
+    updateKeeperDepthVisual();
 
     // Render angle visualization
     renderAngleSVG();
@@ -2084,10 +2263,10 @@
     const svg = document.getElementById('angle-svg');
     const sx = state.shooterPos.x * 2; // viewBox is 200x140
     const sy = state.shooterPos.y * 1.4;
-    // Goal posts (visualized within viewBox)
-    const postLX = 43 * 2;
-    const postRX = 57 * 2;
-    const postY = 0;
+    // Goal posts in the unified perspective scene.
+    const postLX = 34 * 2;
+    const postRX = 66 * 2;
+    const postY = 45;
     svg.innerHTML = `
       <polygon class="angle-line" points="${sx},${sy} ${postLX},${postY} ${postRX},${postY}" />
       <line x1="${sx}" y1="${sy}" x2="${postLX}" y2="${postY}" stroke="#FF7A2E" stroke-width="1" stroke-dasharray="2 2" opacity="0.6" />
@@ -2153,8 +2332,28 @@
     // GK in goal: map state.gkPos.x relative to goal posts (43..57) -> 0..78%
     const goalCenterPct = 50;
     const lateralOffset = state.gkPos.x - goalCenterPct;
-    const gkInGoalLeft = 41 + lateralOffset * 2; // amplify movement
-    document.getElementById('sim-gk').style.left = Math.max(5, Math.min(78, gkInGoalLeft)) + '%';
+    const gkInGoalLeft = 39 + lateralOffset * 2; // amplify movement
+    document.getElementById('sim-gk').style.left = Math.max(4, Math.min(74, gkInGoalLeft)) + '%';
+  }
+
+  function handleShotZoneTap(event) {
+    event.stopPropagation();
+    const zoneEl = event.target.closest ? event.target.closest('.shot-zone') : null;
+    let zone = zoneEl?.dataset?.zone;
+    if (!zone) {
+      zone = zoneFromGoalPoint(event.clientX, event.clientY, event.currentTarget.getBoundingClientRect());
+    }
+    selectSimZone(zone);
+  }
+
+  function zoneFromGoalPoint(clientX, clientY, rect) {
+    const col = Math.max(1, Math.min(4, Math.floor(((clientX - rect.left) / rect.width) * 4) + 1));
+    const row = Math.max(1, Math.min(4, Math.floor(((clientY - rect.top) / rect.height) * 4) + 1));
+    return `R${row}C${col}`;
+  }
+
+  function selectZoneFromGoalPoint(clientX, clientY, rect) {
+    selectSimZone(zoneFromGoalPoint(clientX, clientY, rect));
   }
 
   function selectSimZone(zone) {
@@ -2180,13 +2379,12 @@
     document.getElementById('sim-gk').className = 'gk-sim';
 
     // Random shooter starting position (in penalty area-ish)
-    const angle = (Math.random() - 0.5) * 1.0; // -0.5..0.5 rad
-    const dist = 25 + Math.random() * 50;       // 25-75% from goal
-    const sx = 50 + Math.sin(angle) * 25;
+    const dist = 62 + Math.random() * 24;       // 62-86% from goal
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const sx = 50 + side * (10 + Math.random() * 18);
     const sy = Math.max(20, Math.min(90, dist));
     state.shooterPos = { x: sx, y: sy };
-    document.getElementById('shooter-pitch').style.left = sx + '%';
-    document.getElementById('shooter-pitch').style.top = sy + '%';
+    updateShooterVisual();
     document.getElementById('shooter-pitch').classList.add('armed');
     document.getElementById('tap-hint').style.display = 'block';
 
@@ -2284,7 +2482,7 @@
 
       setTimeout(() => showOutcome({
         outcome, zone, gkAction: reaction.label, reactionMs, decisionQuality,
-        charged: reaction.charged
+        charged: reaction.charged, guessZone: reaction.guessZone
       }), 350);
     }, 450);
   }
@@ -2377,6 +2575,87 @@
     return 55;
   }
 
+  function buildDecisionFeedback(o) {
+    const picked = ZONE_NAMES[o.zone] || o.zone;
+    const elapsed = (o.reactionMs / 1000).toFixed(1);
+    const remaining = Math.max(0, state.decisionWindowMs - o.reactionMs);
+    const quickCue = remaining > 1200
+      ? 'You acted before the window collapsed, which preserves movement quality.'
+      : 'The shot came late, so the decision score is penalized for rushed execution under time pressure.';
+
+    if (o.hesitation) {
+      const better = ZONE_NAMES[highCornerAwayFromKeeper()];
+      return {
+        reason: `You used the full ${elapsed}s window, so the model scores this as a delayed perception-action response rather than a chosen finish.`,
+        advice: `Use the keeper's first set or shuffle as the temporal-occlusion cue. If the read is unclear, commit earlier to ${better} instead of letting the defender close.`,
+        science: 'Temporal occlusion: train on the earliest reliable movement cue, not the full action.'
+      };
+    }
+
+    if (o.charged) {
+      const better = ZONE_NAMES[highCornerAwayFromKeeper()];
+      return zoneIsTop(o.zone) ? {
+        reason: `The keeper charged to shrink the shooting angle. Going high kept the ball away from the low block, so ${picked} was a strong response.`,
+        advice: `Next time, make that choice even earlier: when the keeper steps forward, open your body and lift toward ${better}.`,
+        science: 'Angle reduction: a charging keeper removes low space first, so height preserves the finish.'
+      } : {
+        reason: `The keeper charged to reduce your angle, and ${picked} stayed in the low block zone where close-range keepers make most saves.`,
+        advice: `Against a charge, the better decision is usually ${better}: lift the finish over the set body instead of shooting through it.`,
+        science: 'Angle reduction: a charging keeper removes low space first, so height preserves the finish.'
+      };
+    }
+
+    if (o.guessZone) {
+      const keeperRead = ZONE_NAMES[o.guessZone] || o.guessZone;
+      const betterZone = oppositeZone(o.guessZone);
+      const better = ZONE_NAMES[betterZone] || betterZone;
+      if (o.guessZone === o.zone) {
+        return {
+          reason: `The keeper's commit matched your target at ${picked}. The score drops because the shot followed the keeper's read instead of exploiting the space he left.`,
+          advice: `When the keeper commits this clearly, finish opposite the dive. The better decision was ${better}.`,
+          science: 'Perception-action coupling: read the keeper cue and immediately act into the opened space.'
+        };
+      }
+      if (zoneSide(o.guessZone) === zoneSide(o.zone)) {
+        return {
+          reason: `The keeper moved toward ${keeperRead}, and ${picked} stayed on that same side. That keeps the shot in the keeper's recovery lane.`,
+          advice: `Use the dive as your cue to switch sides. A better option was ${better}, preferably with height if the angle allows it.`,
+          science: 'Perception-action coupling: read the keeper cue and immediately act into the opened space.'
+        };
+      }
+      return {
+        reason: `The keeper committed toward ${keeperRead}, and ${picked} attacked the opposite side. That is why the decision score is high.`,
+        advice: `Keep scanning the keeper before contact. This is perception-action coupling: read the movement cue, then finish into the space it opens.`,
+        science: 'Visual anticipation: successful finishers pick up the keeper movement before ball contact.'
+      };
+    }
+
+    if (state.currentMetrics.xg < 0.15) {
+      return {
+        reason: `${picked} was not punished by a clear keeper read, but the shooting angle was low-value at ${state.currentMetrics.xg.toFixed(2)} xG.`,
+        advice: `Before shooting, take one touch toward the center if the defender is not closing. Better geometry raises the goal-mouth angle before the finish.`,
+        science: 'Shot geometry: central, closer shots increase the visible goal mouth and expected goal value.'
+      };
+    }
+
+    return {
+      reason: `${picked} was acceptable because the keeper did not make a strong read. ${quickCue}`,
+      advice: `For a stronger decision score, pair the finish with a clearer cue: shoot away from the keeper's first step or pick a high corner when he sets low.`,
+      science: 'Visual anticipation: combine the keeper cue with shot geometry before selecting the target.'
+    };
+  }
+
+  function renderDecisionFeedback(o) {
+    const feedback = buildDecisionFeedback(o);
+    const box = document.getElementById('decision-feedback');
+    box.innerHTML = `
+      <div class="decision-feedback-title">Why this score</div>
+      <div class="decision-feedback-line">${feedback.reason}</div>
+      <div class="decision-feedback-line"><b>Better decision:</b> ${feedback.advice}</div>
+      <div class="decision-feedback-line"><b>Science cue:</b> ${feedback.science}</div>
+    `;
+  }
+
   function showOutcome(o) {
     const flash = document.getElementById('outcome-flash');
     const word = document.getElementById('outcome-word');
@@ -2415,6 +2694,7 @@
       dq.classList.add('poor');
       dq.innerHTML = `⚠️ <b>Poor decision (${o.decisionQuality}/100)</b><br/><span style="font-weight:500;font-size:11px">You shot toward the keeper. Read the dive next time.</span>`;
     }
+    renderDecisionFeedback(o);
 
     flash.classList.add('show');
   }
